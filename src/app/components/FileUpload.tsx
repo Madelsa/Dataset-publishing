@@ -16,21 +16,42 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [datasetDescription, setDatasetDescription] = useState('');
 
   // Accept only CSV and Excel files
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const selectedFile = acceptedFiles[0];
-    
-    // Reset error state
+  const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
+    // Clear previous errors
     setError(null);
     
-    // Validate file type
-    const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    if (!validTypes.includes(selectedFile.type)) {
-      setError('Please upload a CSV or Excel file');
+    // Handle file rejections (invalid file types)
+    if (fileRejections.length > 0) {
+      const errorMessage = 'Please upload a CSV or Excel file (.csv, .xls, .xlsx)';
+      setError(errorMessage);
+      return;
+    }
+    
+    // No files provided
+    if (acceptedFiles.length === 0) {
+      return;
+    }
+    
+    const selectedFile = acceptedFiles[0];
+    
+    // Additional validation for file extensions
+    const fileName = selectedFile.name.toLowerCase();
+    const validExtensions = ['.csv', '.xls', '.xlsx'];
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!hasValidExtension) {
+      const errorMessage = 'Please upload a CSV or Excel file (.csv, .xls, .xlsx)';
+      setError(errorMessage);
       return;
     }
     
     setFile(selectedFile);
   }, []);
+
+  // Validate if dataset name is alphanumeric
+  const isAlphanumeric = (str: string): boolean => {
+    return /^[a-zA-Z0-9]+$/.test(str);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -45,13 +66,23 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
+    // Clear previous errors
+    setError(null);
+    
     if (!file) {
       setError('Please select a file to upload');
       return;
     }
 
-    if (!datasetName.trim()) {
+    const trimmedName = datasetName.trim();
+    if (!trimmedName) {
       setError('Please provide a dataset name');
+      return;
+    }
+    
+    // Check if dataset name is alphanumeric
+    if (!isAlphanumeric(trimmedName)) {
+      setError('Dataset name must contain only letters and numbers (no spaces or special characters)');
       return;
     }
 
@@ -61,7 +92,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       // Create FormData to send the file and metadata
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('name', datasetName);
+      formData.append('name', trimmedName);
       formData.append('description', datasetDescription);
       
       // Send the file to the API
@@ -70,12 +101,12 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         body: formData,
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to upload file');
+        throw new Error(data.message || 'Failed to upload file');
       }
       
-      const data = await response.json();
       onUploadComplete(data);
       
       // Reset the form
@@ -84,7 +115,8 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       setDatasetDescription('');
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'An error occurred while uploading the file');
+      const errorMessage = err.message || 'An error occurred while uploading the file';
+      setError(errorMessage);
     } finally {
       setUploading(false);
     }
@@ -103,9 +135,12 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
             value={datasetName}
             onChange={(e) => setDatasetName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Enter dataset name"
+            placeholder="Enter dataset name (letters and numbers only)"
             required
           />
+          <p className="text-xs text-gray-500">
+            Dataset names can only contain letters and numbers (no spaces or special characters).
+          </p>
         </div>
         
         <div className="space-y-2">
@@ -156,7 +191,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                 {file.name}
               </p>
               <p className="text-xs text-gray-500">
-                {(file.size / 1024).toFixed(2)} KB • {file.type}
+                {(file.size / 1024).toFixed(2)} KB • {file.type || 'Unknown file type'}
               </p>
             </div>
           </div>

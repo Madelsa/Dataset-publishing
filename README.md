@@ -28,7 +28,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 
    ```bash
    git clone <repository-url>
-   cd dataset-publishing-platform
+   cd Dataset-publishing
    ```
 
 2. Install dependencies:
@@ -39,10 +39,10 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 
 3. Configure PostgreSQL:
 
-   - Create a PostgreSQL database named `dataset_publishing_platform`
+   - Create a PostgreSQL database named `dataset_publishing`
    - Update the `.env` file with your PostgreSQL connection details:
      ```
-     DATABASE_URL="postgresql://username:password@localhost:5432/dataset_publishing_platform?schema=public"
+     DATABASE_URL="postgresql://username:password@localhost:5432/dataset_publishing?schema=public"
      ```
 
 4. Run database migrations:
@@ -80,6 +80,33 @@ A web application for uploading, processing, and publishing datasets in CSV and 
      ```
    - Prisma Studio will start on [http://localhost:5555](http://localhost:5555)
    - Browse and manage your datasets and file metadata through the visual interface
+
+## Design and Styling
+
+The application uses a modern styling approach with TailwindCSS:
+
+### Key Design Files
+
+- **`src/app/globals.css`** - Global styles and Tailwind directives
+- **`src/app/layout.tsx`** - Root layout with font imports
+- **`postcss.config.mjs`** - PostCSS configuration for Tailwind
+
+### Component-Based Styling
+
+UI components in `src/app/components/` use Tailwind utility classes:
+
+- **`FileUpload.tsx`** - Styling for the file upload interface
+- **`DatasetInfo.tsx`** - Styling for dataset information display
+
+### Modifying Styles
+
+To make design changes:
+
+1. **Component-specific styling**: Modify Tailwind classes in component files
+2. **Global styling**: Update `globals.css`
+3. **Layout changes**: Modify `layout.tsx`
+
+The project supports dark mode through media queries in `globals.css`.
 
 ## Sample Data
 
@@ -125,6 +152,70 @@ These files can be used to test the upload and processing functionality of the p
 - `columnNames` - Array of column names
 - `createdAt` - Timestamp of creation
 - `updatedAt` - Timestamp of last update
+
+## Database Management
+
+### Creating a New Migration
+
+When you make changes to your Prisma schema, create a new migration:
+
+```bash
+npx prisma migrate dev --name <migration-name>
+```
+
+### Applying Migrations to Production
+
+To apply migrations to a production database:
+
+```bash
+npx prisma migrate deploy
+```
+
+### Resetting the Database
+
+To completely reset your database (⚠️ CAUTION: this will delete all data):
+
+```bash
+npx prisma migrate reset
+```
+
+Or with force flag to skip confirmation:
+
+```bash
+npx prisma migrate reset --force
+```
+
+### Generating Prisma Client
+
+After schema changes, regenerate the Prisma client:
+
+```bash
+npx prisma generate
+```
+
+### Database Seeding
+
+To populate your database with sample data:
+
+```bash
+npx prisma db seed
+```
+
+Note: To enable seeding, add a seed script to your package.json:
+
+```json
+"prisma": {
+  "seed": "ts-node prisma/seed.ts"
+}
+```
+
+### Database Introspection
+
+If you have an existing database and want to generate a Prisma schema from it:
+
+```bash
+npx prisma db pull
+```
 
 ## Development
 
