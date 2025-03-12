@@ -1,0 +1,21 @@
+id,product_name,category,price,sale_date,customer,region
+1,Laptop Pro,Electronics,1299.99,2023-01-15,John Smith,North
+2,Office Chair,Furniture,249.50,2023-01-16,Emily Jones,South
+3,Wireless Mouse,Electronics,45.99,2023-01-18,David Wilson,East
+4,Coffee Maker,Appliances,89.95,2023-01-20,Sarah Brown,West
+5,Desk Lamp,Furniture,59.99,2023-01-22,Michael Taylor,North
+6,External Hard Drive,Electronics,129.99,2023-01-25,Jennifer Davis,South
+7,Bluetooth Speaker,Electronics,79.99,2023-01-28,Robert Miller,East
+8,Office Desk,Furniture,349.99,2023-01-30,Lisa Anderson,West
+9,Smartphone,Electronics,899.99,2023-02-01,Daniel Thomas,North
+10,Tablet,Electronics,599.99,2023-02-03,Jessica White,South
+11,Monitor,Electronics,299.99,2023-02-05,Andrew Harris,East
+12,Printer,Electronics,199.99,2023-02-08,Elizabeth Martin,West
+13,Microwave,Appliances,149.99,2023-02-10,Christopher Clark,North
+14,Toaster,Appliances,49.99,2023-02-12,Michelle Lewis,South
+15,Headphones,Electronics,129.99,2023-02-15,Kevin Walker,East
+16,Desk Chair,Furniture,199.50,2023-02-18,Laura Hall,West
+17,Keyboard,Electronics,89.99,2023-02-20,Brian Young,North
+18,Blender,Appliances,79.95,2023-02-22,Amanda King,South
+19,Bookshelf,Furniture,159.99,2023-02-25,Ryan Wright,East
+20,Smart Watch,Electronics,249.99,2023-02-28,Nicole Green,West 

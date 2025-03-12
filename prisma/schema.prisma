@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Models for Dataset Upload and Processing System
+
+model Dataset {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  fileMetadata FileMetadata?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model FileMetadata {
+  id           String     @id @default(uuid())
+  datasetId    String     @unique
+  dataset      Dataset    @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  originalName String
+  fileSize     Int        // Size in bytes
+  fileType     String     // CSV or XLSX
+  rowCount     Int
+  columnNames  String[]   // Array of column names
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
