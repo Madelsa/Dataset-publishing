@@ -47,78 +47,85 @@ export default function DatasetInfo({ dataset }: DatasetInfoProps) {
   };
   
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">{dataset.name}</h2>
-        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+    <div className="bg-white shadow-lg rounded-lg p-6 max-w-2xl mx-auto border border-gray-200">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">{dataset.name}</h2>
+        <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full border border-green-200 shadow-sm">
           Successfully Uploaded
         </span>
       </div>
       
       {dataset.description && (
-        <div className="flex items-start mb-4 text-gray-600">
-          <FiInfo className="h-5 w-5 mr-2 mt-0.5" />
-          <p>{dataset.description}</p>
+        <div className="flex items-start mb-6 text-gray-700">
+          <FiInfo className="h-5 w-5 mr-3 mt-0.5 text-indigo-500 flex-shrink-0" />
+          <p className="text-base">{dataset.description}</p>
         </div>
       )}
       
-      <div className="bg-gray-50 rounded-md p-4 mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-indigo-50 rounded-md p-5 mb-6 border border-indigo-100 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex items-center">
-            <FiFile className="h-5 w-5 text-indigo-500 mr-2" />
+            <FiFile className="h-6 w-6 text-indigo-600 mr-3 flex-shrink-0" />
             <div>
-              <p className="text-sm text-gray-500">File Name</p>
-              <p className="font-medium">{dataset.fileMetadata.originalName}</p>
+              <p className="text-sm font-semibold text-indigo-800 mb-1">File Name</p>
+              <p className="text-base font-medium text-gray-800">{dataset.fileMetadata.originalName}</p>
             </div>
           </div>
           
           <div className="flex items-center">
-            <FiGrid className="h-5 w-5 text-indigo-500 mr-2" />
+            <FiGrid className="h-6 w-6 text-indigo-600 mr-3 flex-shrink-0" />
             <div>
-              <p className="text-sm text-gray-500">Rows</p>
-              <p className="font-medium">{dataset.fileMetadata.rowCount.toLocaleString()}</p>
+              <p className="text-sm font-semibold text-indigo-800 mb-1">Rows</p>
+              <p className="text-base font-medium text-gray-800">{dataset.fileMetadata.rowCount.toLocaleString()}</p>
             </div>
           </div>
           
           <div className="flex items-center">
-            <FiList className="h-5 w-5 text-indigo-500 mr-2" />
+            <FiList className="h-6 w-6 text-indigo-600 mr-3 flex-shrink-0" />
             <div>
-              <p className="text-sm text-gray-500">Columns</p>
-              <p className="font-medium">{dataset.fileMetadata.columnNames.length}</p>
+              <p className="text-sm font-semibold text-indigo-800 mb-1">Columns</p>
+              <p className="text-base font-medium text-gray-800">{dataset.fileMetadata.columnNames.length}</p>
             </div>
           </div>
           
           <div className="flex items-center">
-            <FiCalendar className="h-5 w-5 text-indigo-500 mr-2" />
+            <FiCalendar className="h-6 w-6 text-indigo-600 mr-3 flex-shrink-0" />
             <div>
-              <p className="text-sm text-gray-500">Uploaded</p>
-              <p className="font-medium">{formatDate(dataset.createdAt)}</p>
+              <p className="text-sm font-semibold text-indigo-800 mb-1">Uploaded</p>
+              <p className="text-base font-medium text-gray-800">{formatDate(dataset.createdAt)}</p>
             </div>
           </div>
         </div>
         
-        <div className="mt-4">
-          <p className="text-sm text-gray-500">Size: {formatFileSize(dataset.fileMetadata.fileSize)}</p>
-          <p className="text-sm text-gray-500">Type: {dataset.fileMetadata.fileType}</p>
+        <div className="mt-5 pt-4 border-t border-indigo-100">
+          <p className="text-sm font-medium text-gray-700 mb-1">
+            Size: <span className="text-gray-800">{formatFileSize(dataset.fileMetadata.fileSize)}</span>
+          </p>
+          <p className="text-sm font-medium text-gray-700">
+            Type: <span className="text-gray-800">{dataset.fileMetadata.fileType}</span>
+          </p>
         </div>
       </div>
       
-      <div className="border border-gray-200 rounded-md overflow-hidden">
+      <div className="border border-gray-200 rounded-md overflow-hidden shadow-sm">
         <div 
-          className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100"
+          className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
           onClick={() => setShowColumns(!showColumns)}
         >
-          <h3 className="font-medium">Column Information</h3>
-          <button className="text-indigo-600">
+          <h3 className="font-semibold text-gray-800">Column Information</h3>
+          <button className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
             {showColumns ? 'Hide Columns' : 'Show Columns'}
           </button>
         </div>
         
         {showColumns && (
-          <div className="p-4 bg-white">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="p-5 bg-white">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {dataset.fileMetadata.columnNames.map((column, index) => (
-                <div key={index} className="bg-gray-50 p-2 rounded text-sm">
+                <div 
+                  key={index} 
+                  className="bg-gray-50 p-3 rounded-md text-sm font-medium text-gray-800 border border-gray-200 shadow-sm hover:bg-indigo-50 hover:border-indigo-200 transition-colors"
+                >
                   {column}
                 </div>
               ))}
@@ -128,4 +135,4 @@ export default function DatasetInfo({ dataset }: DatasetInfoProps) {
       </div>
     </div>
   );
-} 
+}
