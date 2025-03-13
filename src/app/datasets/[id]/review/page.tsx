@@ -43,7 +43,7 @@ export default function DatasetReviewPage() {
     setErrorMessage(null);
     
     try {
-      await datasetsApi.publishDataset(datasetId);
+      await datasetsApi.publishDataset(datasetId, feedbackText.trim() || undefined);
       router.push(`/datasets/${datasetId}?approved=true`);
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to approve dataset');
@@ -160,7 +160,7 @@ export default function DatasetReviewPage() {
           
           <div className="mb-4">
             <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">
-              Feedback (required for rejection)
+              Feedback (required for rejection, optional for approval)
             </label>
             <textarea
               id="feedback"

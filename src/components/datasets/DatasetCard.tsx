@@ -35,15 +35,20 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
     createdAt,
   } = dataset;
   
-  // Check publication status first (for rejected)
+  // Check publication status first (for rejected and approved)
   const isRejected = 'publicationStatus' in dataset && dataset.publicationStatus === 'REJECTED';
+  const isPublished = 'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED';
   
   // Get metadata status
-  let displayStatus = isRejected ? 'REJECTED' : 'metadataStatus' in dataset 
-    ? dataset.metadataStatus 
-    : 'hasMetadata' in dataset && dataset.hasMetadata
-      ? 'EDITED' // Show as "Pending Review" for DatasetListItem with metadata
-      : 'PENDING'; // Show as "Needs Metadata" 
+  let displayStatus = isRejected 
+    ? 'REJECTED' 
+    : isPublished 
+      ? 'APPROVED' 
+      : 'metadataStatus' in dataset 
+        ? dataset.metadataStatus 
+        : 'hasMetadata' in dataset && dataset.hasMetadata
+          ? 'EDITED' // Show as "Pending Review" for DatasetListItem with metadata
+          : 'PENDING'; // Show as "Needs Metadata" 
   
   // Simplify GENERATED to match our simplified statuses
   if (displayStatus === 'GENERATED') {
@@ -161,11 +166,6 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
         
         <div className="mt-4 flex items-center justify-between">
           <StatusBadge status={displayStatus as any} />
-          
-          {/* Only show PUBLISHED status separately if not already showing REJECTED */}
-          {!isRejected && 'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED' && (
-            <StatusBadge status="APPROVED" className="ml-2" />
-          )}
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FiAlertCircle } from 'react-icons/fi';
+import { FiAlertCircle, FiMessageCircle } from 'react-icons/fi';
 import { Dataset } from '@/types/dataset.types';
 
 // Import modular components
@@ -32,7 +32,8 @@ export default function DatasetDetail({ dataset, isReviewer = false }: DatasetDe
     createdAt,
     updatedAt,
     fileMetadata,
-    metadataDraft
+    metadataDraft,
+    reviewComment
   } = datasetState;
 
   // Determine if dataset has metadata
@@ -63,6 +64,18 @@ export default function DatasetDetail({ dataset, isReviewer = false }: DatasetDe
               <FiAlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {reviewComment && (
+          <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
+            <div className="flex items-start space-x-3">
+              <FiMessageCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-medium text-blue-800">Reviewer Comment</h3>
+                <p className="mt-1 text-sm text-blue-700">{reviewComment}</p>
               </div>
             </div>
           </div>

@@ -192,11 +192,13 @@ export const datasetsApi = {
    * Approve and publish a dataset
    * 
    * @param id - Dataset ID
+   * @param comment - Optional feedback or comment for the approval
    * @returns Promise resolving to the published dataset
    */
-  publishDataset: async (id: string): Promise<Dataset> => {
+  publishDataset: async (id: string, comment?: string): Promise<Dataset> => {
     const update: PublicationStatusUpdate = {
-      publicationStatus: 'PUBLISHED'
+      publicationStatus: 'PUBLISHED',
+      reviewComment: comment
     };
     
     const response = await fetch(`/api/datasets/${id}/publish`, {
