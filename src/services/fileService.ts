@@ -148,7 +148,8 @@ async function parseCSV(file: File): Promise<ProcessedFile> {
     return {
       rowCount: records.length,
       columnNames,
-      sampleData: records.slice(0, 5) // Include sample data for better metadata generation
+      sampleData: records.slice(0, 5), // Include sample data for metadata generation
+      fullData: records // Store the full dataset
     };
   } catch (error) {
     console.error('Error parsing CSV with csv-parse:', error);
@@ -207,7 +208,8 @@ async function parseAsExcelCSV(file: File, content?: string): Promise<ProcessedF
     return {
       rowCount: dataRecords.length,
       columnNames,
-      sampleData: dataRecords.slice(0, 5) // Include sample data for better metadata generation
+      sampleData: dataRecords.slice(0, 5), // Include sample data for metadata generation
+      fullData: dataRecords // Store the full dataset
     };
   } catch (error) {
     console.error('Error parsing CSV as Excel CSV:', error);
@@ -272,7 +274,8 @@ async function parseExcel(file: File): Promise<ProcessedFile> {
     return {
       rowCount: dataRecords.length,
       columnNames,
-      sampleData: dataRecords.slice(0, 5) // Include sample data for better metadata generation
+      sampleData: dataRecords.slice(0, 5), // Include sample data for metadata generation
+      fullData: dataRecords // Store the full dataset
     };
   } catch (error) {
     console.error('Error parsing Excel:', error);

@@ -32,6 +32,7 @@ model FileMetadata {
   rowCount     Int
   columnNames  String[]
   sampleData   Json?    // Store sample data rows as JSON for metadata generation
+  fullData     Json?    // Store complete file data for downloading
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   dataset      Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)

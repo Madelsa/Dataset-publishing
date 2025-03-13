@@ -20,6 +20,7 @@ export interface FileMetadata {
   rowCount: number;
   columnNames: string[];
   sampleData?: any[]; // Sample data from the file for metadata generation
+  fullData?: any[]; // Complete file data for download
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -117,5 +118,6 @@ export interface ProcessedFile {
   rowCount: number;
   columnNames: string[];
   sampleData?: any[]; // Sample data from the file to use for metadata generation
+  fullData?: any[]; // Full data from the file for complete dataset storage
   error?: string;
 } 

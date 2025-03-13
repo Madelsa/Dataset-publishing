@@ -30,7 +30,8 @@ export async function GET(
     
     // Get the file details
     const columnNames = dataset.fileMetadata.columnNames;
-    const sampleData = dataset.fileMetadata.sampleData || [];
+    // Use fullData if available, fall back to sampleData if not
+    const dataRows = dataset.fileMetadata.fullData || dataset.fileMetadata.sampleData || [];
     const originalName = dataset.fileMetadata.originalName;
     const fileType = dataset.fileMetadata.fileType || '';
     
@@ -46,9 +47,9 @@ export async function GET(
       // Add header row
       worksheet.addRow(columnNames);
       
-      // Add data rows - use all available sample data
-      if (sampleData && Array.isArray(sampleData) && sampleData.length > 0) {
-        sampleData.forEach(row => {
+      // Add data rows - use all available data
+      if (dataRows && Array.isArray(dataRows) && dataRows.length > 0) {
+        dataRows.forEach(row => {
           const rowValues = columnNames.map(col => row[col] || '');
           worksheet.addRow(rowValues);
         });
@@ -67,9 +68,9 @@ export async function GET(
       // Generate CSV file
       let csvContent = columnNames.join(',') + '\n';
       
-      // Add all sample data rows
-      if (sampleData && Array.isArray(sampleData) && sampleData.length > 0) {
-        sampleData.forEach(row => {
+      // Add all data rows
+      if (dataRows && Array.isArray(dataRows) && dataRows.length > 0) {
+        dataRows.forEach(row => {
           const rowValues = columnNames.map(col => {
             const value = row[col];
             // Format the value properly for CSV

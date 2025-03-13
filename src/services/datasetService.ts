@@ -44,6 +44,7 @@ export async function createDataset(
           rowCount: fileData.processedFile.rowCount,
           columnNames: fileData.processedFile.columnNames,
           sampleData: fileData.processedFile.sampleData || undefined,
+          fullData: fileData.processedFile.fullData || undefined,
         }
       }
     },
