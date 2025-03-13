@@ -114,7 +114,7 @@ export default function DatasetDetail({ dataset }: DatasetDetailProps) {
             <button
               onClick={handleDownload}
               disabled={isDownloading}
-              className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 cursor-pointer"
             >
               <FiDownload className="mr-1.5 -ml-0.5 h-4 w-4" />
               {isDownloading ? 'Downloading...' : 'Download'}

@@ -70,3 +70,23 @@ body {
 .theme-button-secondary:hover {
   background-color: var(--gray-light);
 }
+
+/* Interactive element utilities */
+.clickable {
+  cursor: pointer;
+}
+
+/* Ensure all buttons, links and interactive elements have appropriate cursor */
+button:not([disabled]),
+a[href],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+[role="button"],
+.btn {
+  cursor: pointer;
+}
+
+button[disabled] {
+  cursor: not-allowed;
+}

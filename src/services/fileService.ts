@@ -133,7 +133,7 @@ async function parseCSV(file: File): Promise<ProcessedFile> {
     const columnNames = Object.keys(records[0]);
     
     // Validate that we have actual column data
-    const hasData = columnNames.length > 0 && records.some(record => 
+    const hasData = columnNames.length > 0 && records.some((record: Record<string, any>) => 
       columnNames.some(col => record[col] !== undefined && record[col] !== null && record[col] !== '')
     );
     
