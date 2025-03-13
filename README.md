@@ -49,18 +49,65 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 
      - **macOS**: `brew install postgresql@14` or download from [postgresql.org](https://www.postgresql.org/download/macosx/)
 
+   - **Start PostgreSQL Service**:
+
+     ```bash
+     # Start PostgreSQL service with Homebrew
+     brew services start postgresql@14
+
+     # Check service status
+     brew services list | grep postgres
+     ```
+
    - **Create a database**:
 
      ```bash
-     # Connect to PostgreSQL
-     psql -U postgres
-
      # Create the database
-     CREATE DATABASE dataset_publishing;
-
-     # Exit
-     \q
+     createdb dataset_publishing_platform
      ```
+
+   - **Database Connection Issues**:
+
+     If you encounter permission issues like `User 'postgres' was denied access`, update your `.env` file to use your system username:
+
+     ```
+     # Replace 'postgres' with your system username
+     DATABASE_URL="postgresql://yourusername:postgres@localhost:5432/dataset_publishing_platform?schema=public"
+     ```
+
+     You can get your system username with:
+
+     ```bash
+     whoami
+     ```
+
+   - **View Database Contents**:
+
+     You can view your database in several ways:
+
+     1. Using psql (command line):
+
+     ```bash
+     # List all tables
+     psql -d dataset_publishing_platform -c "\dt"
+
+     # Describe a specific table (note: use quotes for case sensitivity)
+     psql -d dataset_publishing_platform -c "\d \"Dataset\""
+     ```
+
+     2. Using Prisma Studio (GUI):
+
+     ```bash
+     npx prisma studio
+     ```
+
+     Then visit http://localhost:5555 in your browser
+
+     3. Using a PostgreSQL GUI client:
+
+     - pgAdmin: https://www.pgadmin.org/download/
+     - Postico (macOS): https://eggerapps.at/postico/
+     - TablePlus: https://tableplus.com/
 
 4. Get a Gemini API key:
 
