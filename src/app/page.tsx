@@ -27,7 +27,6 @@ export default function Home() {
     isLoading,
     error,
     refetch,
-    fileTypes,
     handleFilterChange,
   } = useFilteredDatasets();
 
@@ -48,7 +47,6 @@ export default function Home() {
           <div className="flex-grow">
             <SearchAndFilter 
               onChange={handleFilterChange}
-              fileTypes={fileTypes}
             />
           </div>
           <div className="sm:self-start sm:mt-4">
