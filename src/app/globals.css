@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Main theme colors */
+  --primary: #6d28d9;        /* Purple */
+  --primary-light: #8b5cf6;  /* Light purple */
+  --primary-dark: #5b21b6;   /* Dark purple */
+  
+  --gray-light: #f8f8fb;     /* Very light greyish white for backgrounds */
+  --gray-medium: #e9e9ef;    /* Medium greyish white for borders, dividers */
+  --gray-dark: #9ca3af;      /* Darker gray for secondary text */
+  
+  --white: #ffffff;          /* Pure white */
+  --black: #1f2937;          /* Near black for main text */
+  
+  /* Functional colors */
+  --success: #10b981;        /* Green */
+  --warning: #f59e0b;        /* Amber */
+  --error: #ef4444;          /* Red */
+  --info: #3b82f6;           /* Blue */
+  
+  /* Base colors */
+  --background: var(--gray-light);
+  --foreground: var(--black);
+  --card-background: var(--white);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* We'll disable dark mode for now to keep a consistent theme */
+/*
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
+*/
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Adding some utility classes for our theme */
+.theme-card {
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.theme-border {
+  border-color: var(--gray-medium);
+}
+
+.theme-button-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.theme-button-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.theme-button-secondary {
+  background-color: var(--white);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.theme-button-secondary:hover {
+  background-color: var(--gray-light);
 }

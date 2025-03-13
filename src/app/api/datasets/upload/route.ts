@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { processFile, validateFile } from '@/lib/fileProcessing';
+import { createDataset, datasetNameExists } from '@/services/datasetService';
+import { processFile, validateFile } from '@/services/fileService';
 
+/**
+ * API Route: POST /api/datasets/upload
+ * 
+ * Purpose: Handle dataset file upload
+ * Processes and validates uploaded CSV/Excel files and saves them to the database
+ * 
+ * @accepts FormData with:
+ *   - file: The CSV or Excel file to upload
+ *   - name: The dataset name (alphanumeric only)
+ *   - description: Optional dataset description
+ * 
+ * @returns The created dataset object or error message
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -9,7 +22,7 @@ export async function POST(request: NextRequest) {
     const name = formData.get('name') as string;
     const description = formData.get('description') as string || '';
 
-    // Validate input
+    // Validate required input
     if (!file) {
       return NextResponse.json(
         { message: 'No file provided' },
@@ -25,16 +38,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate dataset name
-    const existingDataset = await prisma.dataset.findFirst({
-      where: {
-        name: {
-          equals: name,
-          mode: 'insensitive' // Case-insensitive check
-        }
-      }
-    });
-
-    if (existingDataset) {
+    const nameExists = await datasetNameExists(name);
+    if (nameExists) {
       return NextResponse.json(
         { message: 'A dataset with this name already exists. Please choose a different name.' },
         { status: 400 }
@@ -62,24 +67,20 @@ export async function POST(request: NextRequest) {
       }
 
       // Save dataset to database
-      const dataset = await prisma.dataset.create({
-        data: {
-          name,
-          description,
-          fileMetadata: {
-            create: {
-              originalName: file.name,
-              fileSize: file.size,
-              fileType: file.type || (file.name.endsWith('.csv') ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
-              rowCount: processedFile.rowCount,
-              columnNames: processedFile.columnNames,
-            }
-          }
-        },
-        include: {
-          fileMetadata: true
+      const dataset = await createDataset(
+        name, 
+        description, 
+        {
+          originalName: file.name,
+          fileSize: file.size,
+          fileType: file.type || (
+            file.name.endsWith('.csv') 
+              ? 'text/csv' 
+              : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          ),
+          processedFile
         }
-      });
+      );
 
       return NextResponse.json({
         message: 'File uploaded successfully',
@@ -99,6 +100,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * API Route: GET /api/datasets/upload
+ * 
+ * Purpose: Informational endpoint
+ * Informs clients that they should use POST for uploading datasets
+ */
 export async function GET() {
   return NextResponse.json({ message: 'Use POST to upload a dataset' });
 } 

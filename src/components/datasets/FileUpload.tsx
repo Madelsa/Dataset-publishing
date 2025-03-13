@@ -1,11 +1,29 @@
+/**
+ * File Upload Component
+ * 
+ * Provides a user interface for uploading dataset files:
+ * - Supports drag-and-drop file selection
+ * - Validates file types (CSV and Excel only)
+ * - Collects dataset name and optional description
+ * - Handles the upload process with loading states
+ * - Provides error feedback for invalid inputs
+ * 
+ * Uses react-dropzone for the file selection interface and
+ * communicates with the API to upload the dataset.
+ * 
+ * @param onUploadComplete - Callback function triggered when upload is successful
+ */
+
 'use client';
 
 import { useState, useCallback, FormEvent } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FiUpload, FiFile, FiAlertCircle } from 'react-icons/fi';
+import { Dataset } from '@/types/dataset.types';
+import { formatFileSize } from '@/utils/formatting';
 
 interface FileUploadProps {
-  onUploadComplete: (data: any) => void;
+  onUploadComplete: (data: { dataset: Dataset; message: string }) => void;
 }
 
 export default function FileUpload({ onUploadComplete }: FileUploadProps) {
@@ -15,7 +33,15 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [datasetName, setDatasetName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
 
-  // Accept only CSV and Excel files
+  /**
+   * Handle file drop or selection
+   * 
+   * Validates that the file is a CSV or Excel file
+   * Sets the selected file in state or displays an error
+   * 
+   * @param acceptedFiles - Files that passed the type filter
+   * @param fileRejections - Files that were rejected by the type filter
+   */
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
     // Clear previous errors
     setError(null);
@@ -48,7 +74,13 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     setFile(selectedFile);
   }, []);
 
-  // Validate if dataset name is alphanumeric
+  /**
+   * Validate if a string contains only alphanumeric characters
+   * Used to validate dataset names
+   * 
+   * @param str - The string to validate
+   * @returns True if the string is alphanumeric, false otherwise
+   */
   const isAlphanumeric = (str: string): boolean => {
     return /^[a-zA-Z0-9]+$/.test(str);
   };
@@ -63,6 +95,14 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     multiple: false
   });
 
+  /**
+   * Handle form submission
+   * 
+   * Validates inputs, creates a FormData object with the file and metadata,
+   * sends it to the API, and handles the response
+   * 
+   * @param e - Form submission event
+   */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -191,7 +231,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                 {file.name}
               </p>
               <p className="text-xs text-gray-500">
-                {(file.size / 1024).toFixed(2)} KB • {file.type || 'Unknown file type'}
+                {formatFileSize(file.size)} • {file.type || 'Unknown file type'}
               </p>
             </div>
           </div>

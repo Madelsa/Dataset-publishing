@@ -37,7 +37,13 @@ A web application for uploading, processing, and publishing datasets in CSV and 
    npm install
    ```
 
-3. Configure PostgreSQL:
+3. Install recommended TypeScript type definitions for better development experience:
+
+   ```bash
+   npm install --save-dev @types/papaparse
+   ```
+
+4. Configure PostgreSQL:
 
    - Create a PostgreSQL database named `dataset_publishing`
    - Update the `.env` file with your PostgreSQL connection details:
@@ -45,19 +51,19 @@ A web application for uploading, processing, and publishing datasets in CSV and 
      DATABASE_URL="postgresql://username:password@localhost:5432/dataset_publishing?schema=public"
      ```
 
-4. Run database migrations:
+5. Run database migrations:
 
    ```bash
    npx prisma migrate dev --name init
    ```
 
-5. Start the development server:
+6. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Usage
 

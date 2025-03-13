@@ -1,45 +1,102 @@
 'use client';
 
-import { useState } from 'react';
-import FileUpload from './components/FileUpload';
-import DatasetInfo from './components/DatasetInfo';
+import { useState, useEffect } from 'react';
+import { Dataset } from '@/types/dataset.types';
+import PageLayout from '@/components/layout/PageLayout';
+import DatasetGrid from '@/components/datasets/DatasetGrid';
+import Link from 'next/link';
+import { FiPlus, FiAlertCircle } from 'react-icons/fi';
 
+/**
+ * Home Page Component
+ * 
+ * Displays a grid of all available datasets with options to:
+ * - View dataset details
+ * - Upload new datasets
+ * - Delete existing datasets
+ * 
+ * Fetches dataset data from the API and handles state management
+ * for loading, errors, and dataset deletion.
+ */
 export default function Home() {
-  const [uploadedDataset, setUploadedDataset] = useState<any>(null);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleUploadComplete = (data: any) => {
-    setUploadedDataset(data.dataset);
+  useEffect(() => {
+    fetchDatasets();
+  }, []);
+
+  const fetchDatasets = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      const response = await fetch('/api/datasets');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch datasets');
+      }
+      
+      const data = await response.json();
+      setDatasets(data.datasets);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle dataset deletion
+  const handleDatasetDeleted = (datasetId: string) => {
+    setDatasets(datasets.filter(dataset => dataset.id !== datasetId));
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-6 md:p-24">
-      <div className="w-full max-w-5xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Dataset Publishing Platform
-          </h1>
-          <p className="mt-3 text-lg text-gray-600">
-            Upload and publish your datasets in CSV or Excel format
-          </p>
+    <PageLayout 
+      title="Datasets"
+      description="View and manage your datasets"
+    >
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex-1">
+          {/* Title and description are now handled by PageLayout */}
         </div>
+        
+        <Link
+          href="/upload"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+        >
+          <FiPlus className="mr-2 h-4 w-4" />
+          Upload Dataset
+        </Link>
+      </div>
 
-        {uploadedDataset ? (
-          <div className="space-y-6">
-            <DatasetInfo dataset={uploadedDataset} />
-            
-            <div className="text-center mt-6">
-              <button
-                onClick={() => setUploadedDataset(null)}
-                className="px-4 py-2 text-sm font-medium text-indigo-600 bg-white border border-indigo-600 rounded-md hover:bg-indigo-50"
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 p-6 rounded-lg">
+          <div className="flex items-start">
+            <FiAlertCircle className="h-5 w-5 text-red-500 mt-0.5 mr-2" />
+            <div>
+              <h2 className="text-lg font-medium text-red-800 mb-1">Error Loading Datasets</h2>
+              <p className="text-sm text-red-700">{error}</p>
+              <button 
+                onClick={fetchDatasets}
+                className="mt-2 text-sm text-red-800 hover:text-red-900 font-medium underline"
               >
-                Upload Another Dataset
+                Try Again
               </button>
             </div>
           </div>
-        ) : (
-          <FileUpload onUploadComplete={handleUploadComplete} />
-        )}
-      </div>
-    </main>
+        </div>
+      ) : (
+        <DatasetGrid 
+          datasets={datasets} 
+          onDatasetDeleted={handleDatasetDeleted}
+        />
+      )}
+    </PageLayout>
   );
 }

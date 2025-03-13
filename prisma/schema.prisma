@@ -8,12 +8,19 @@ datasource db {
 }
 
 model Dataset {
-  id           String        @id @default(uuid())
-  name         String
-  description  String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  fileMetadata FileMetadata?
+  id                    String        @id @default(uuid())
+  name                  String
+  description           String?
+  suggestedTitle        String?
+  suggestedDescription  String?
+  suggestedTags         String[]      @default([])
+  suggestedCategory     String?
+  metadataLanguage      String        @default("en")
+  metadataDraft         Json?         // Stores draft metadata as JSON
+  metadataStatus        String        @default("PENDING") // PENDING, GENERATED, EDITED, APPROVED
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  fileMetadata          FileMetadata?
 }
 
 model FileMetadata {
@@ -24,6 +31,7 @@ model FileMetadata {
   fileType     String
   rowCount     Int
   columnNames  String[]
+  sampleData   Json?    // Store sample data rows as JSON for metadata generation
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   dataset      Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
