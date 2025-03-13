@@ -15,7 +15,6 @@ import { Dataset } from '@/types/dataset.types';
 import FileInformation from './detail/FileInformation';
 import MetadataSection from './detail/MetadataSection';
 import ActionButtons from './detail/ActionButtons';
-import WorkflowControls from './WorkflowControls';
 
 interface DatasetDetailProps {
   dataset: Dataset;
@@ -38,11 +37,6 @@ export default function DatasetDetail({ dataset, isReviewer = false }: DatasetDe
 
   // Determine if dataset has metadata
   const hasMetadata = !!metadataDraft?.title || !!metadataDraft?.description;
-
-  // Handle workflow updates
-  const handleWorkflowUpdate = (updatedDataset: Dataset) => {
-    setDatasetState(updatedDataset);
-  };
 
   return (
     <div className="space-y-6">
@@ -82,13 +76,6 @@ export default function DatasetDetail({ dataset, isReviewer = false }: DatasetDe
         
         <MetadataSection metadata={metadataDraft} />
       </div>
-      
-      {/* Publication Workflow Controls */}
-      <WorkflowControls 
-        dataset={datasetState}
-        isReviewer={isReviewer}
-        onWorkflowUpdate={handleWorkflowUpdate}
-      />
     </div>
   );
 } 
