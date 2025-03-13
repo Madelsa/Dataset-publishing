@@ -132,7 +132,11 @@ These files can be used to test the upload and processing functionality of the p
   - `upload/route.ts` - API endpoint for file uploads
 - `src/lib/` - Utility functions
   - `prisma.ts` - Prisma client singleton
-  - `fileProcessing.ts` - Functions for file parsing and validation
+  - `aiMetadata.ts` - AI integration for metadata
+- `src/services/` - Business logic services
+  - `datasetService.ts` - Dataset management services
+  - `fileService.ts` - File parsing and validation services
+  - `metadataService.ts` - Metadata generation services
 - `prisma/` - Database schema and migrations
   - `schema.prisma` - Prisma schema for Dataset and FileMetadata models
 

@@ -1,29 +1,17 @@
 /**
  * Dataset and related type definitions
  * 
- * This file contains all the TypeScript interfaces and types used throughout
- * the Dataset Publishing Platform for consistent type checking and autocompletion.
+ * Core dataset types and re-exports of domain-specific types for easier imports.
  */
 
-/**
- * FileMetadata
- * 
- * Represents metadata about the uploaded dataset file
- * Contains information about file properties and structure
- */
-export interface FileMetadata {
-  id: string;
-  datasetId: string;
-  originalName: string;
-  fileSize: number;
-  fileType: string;
-  rowCount: number;
-  columnNames: string[];
-  sampleData?: any[]; // Sample data from the file for metadata generation
-  fullData?: any[]; // Complete file data for download
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+// Import types needed for Dataset interface
+import { FileMetadata } from './file.types';
+import { MetadataStatus, MetadataDraft } from './metadata.types';
+
+// Re-export domain-specific types
+export * from './file.types';
+export * from './metadata.types';
+export * from './api.types';
 
 /**
  * Dataset
@@ -48,76 +36,35 @@ export interface Dataset {
 }
 
 /**
- * MetadataStatus
+ * Dataset List Item
  * 
- * Represents the current state of a dataset's metadata
- * - PENDING: No metadata has been generated yet
- * - GENERATED: AI has generated metadata suggestions
- * - EDITED: User has edited the metadata
- * - APPROVED: Metadata has been reviewed and approved
+ * A simplified version of the Dataset for list views
  */
-export type MetadataStatus = 'PENDING' | 'GENERATED' | 'EDITED' | 'APPROVED';
-
-/**
- * MetadataDraft
- * 
- * User-editable metadata for a dataset
- * Represents the working draft that can be saved
- */
-export interface MetadataDraft {
-  title: string;
-  description: string;
-  tags: string[];
-  category: string;
+export interface DatasetListItem {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: Date | string;
+  hasMetadata: boolean;
 }
 
 /**
- * MetadataSuggestion
+ * Dataset Create Input
  * 
- * AI-generated metadata suggestions for a dataset
- * Used as a starting point for user edits
+ * Input structure for creating a new dataset
  */
-export interface MetadataSuggestion {
-  title: string;
-  description: string;
-  tags: string[];
-  category: string;
+export interface DatasetCreateInput {
+  name: string;
+  description?: string;
+  file: File;
 }
 
 /**
- * MetadataResponse
+ * Dataset Update Input
  * 
- * API response structure for metadata requests
- * Contains both suggested and draft metadata
+ * Input structure for updating an existing dataset
  */
-export interface MetadataResponse {
-  suggested: MetadataSuggestion;
-  draft: MetadataDraft | null;
-  language: string;
-  status: MetadataStatus;
-}
-
-/**
- * FileValidationResult
- * 
- * Result of validating an uploaded file
- * Indicates whether the file is valid and any error messages
- */
-export interface FileValidationResult {
-  valid: boolean;
-  error?: string;
-}
-
-/**
- * ProcessedFile
- * 
- * Result of processing a dataset file
- * Contains information extracted from the file
- */
-export interface ProcessedFile {
-  rowCount: number;
-  columnNames: string[];
-  sampleData?: any[]; // Sample data from the file to use for metadata generation
-  fullData?: any[]; // Full data from the file for complete dataset storage
-  error?: string;
+export interface DatasetUpdateInput {
+  name?: string;
+  description?: string;
 } 
