@@ -1,7 +1,7 @@
 /**
- * Dataset Hook
+ * Dataset Details Hook
  * 
- * Custom hook for fetching and managing a single dataset
+ * Custom hook for fetching and managing a single dataset's details
  * Provides loading, error, and refetching capabilities
  */
 
@@ -10,12 +10,12 @@ import { Dataset } from '@/types/dataset.types';
 import { datasetsApi } from '@/services/api/datasets';
 
 /**
- * Hook for fetching and managing a single dataset
+ * Hook for fetching and managing a single dataset's detailed information
  * 
  * @param datasetId - The ID of the dataset to fetch
  * @returns Object containing the dataset, loading state, error state, and refetch function
  */
-export function useDataset(datasetId: string) {
+export function useDatasetDetails(datasetId: string) {
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -45,9 +45,16 @@ export function useFilteredDatasets() {
     // Apply metadata status filter
     if (filterOptions.metadataStatus !== 'ALL') {
       result = result.filter(dataset => {
+        // Handle special case for REJECTED (which is a publication status)
+        if (filterOptions.metadataStatus === 'REJECTED') {
+          return 'publicationStatus' in dataset && dataset.publicationStatus === 'REJECTED';
+        }
+        
+        // Regular metadata status filtering
         if ('metadataStatus' in dataset) {
           return dataset.metadataStatus === filterOptions.metadataStatus;
         }
+        
         // For DatasetListItem, we only have hasMetadata, so do our best approximation
         if ('hasMetadata' in dataset) {
           // If filtering for PENDING, show items without metadata
@@ -57,6 +64,7 @@ export function useFilteredDatasets() {
           // For other statuses, show items with metadata (not perfect but best approximation)
           return dataset.hasMetadata;
         }
+        
         return false;
       });
     }

@@ -14,7 +14,7 @@ import { MetadataStatus } from '@/types/metadata.types';
 
 export interface FilterOptions {
   search: string;
-  metadataStatus: MetadataStatus | 'ALL';
+  metadataStatus: MetadataStatus | 'ALL' | 'REJECTED';
   sortBy: 'newest' | 'oldest' | 'name';
 }
 
@@ -34,10 +34,10 @@ export default function SearchAndFilter({ onChange }: SearchAndFilterProps) {
   // Define metadata status options
   const metadataStatusOptions = [
     { value: 'ALL', label: 'All Statuses' },
-    { value: 'PENDING', label: 'Pending' },
-    { value: 'GENERATED', label: 'Generated' },
-    { value: 'EDITED', label: 'Edited' },
+    { value: 'PENDING', label: 'Needs Metadata' },
+    { value: 'EDITED', label: 'Pending Review' },
     { value: 'APPROVED', label: 'Approved' },
+    { value: 'REJECTED', label: 'Rejected' },
   ];
 
   // Update parent component when options change
@@ -64,7 +64,7 @@ export default function SearchAndFilter({ onChange }: SearchAndFilterProps) {
 
   // Handle status selection
   const handleStatusChange = (value: string) => {
-    setOptions(prev => ({ ...prev, metadataStatus: value as MetadataStatus | 'ALL' }));
+    setOptions(prev => ({ ...prev, metadataStatus: value as FilterOptions['metadataStatus'] }));
     setIsFilterOpen(false);
   };
 

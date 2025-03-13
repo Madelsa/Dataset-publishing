@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useDataset } from '@/hooks/useDataset';
+import { useDatasetDetails } from '@/hooks/useDatasetDetails';
 import PageLayout from '@/components/layout/PageLayout';
 import DatasetDetail from '@/components/datasets/DatasetDetail';
 import LoadingState from '@/components/ui/LoadingState';
@@ -15,7 +15,7 @@ const SIMULATED_IS_REVIEWER = true;
  * Dataset Detail Page Component
  * 
  * Displays detailed information about a specific dataset.
- * This page acts as a container and handles data fetching using the useDataset hook.
+ * This page acts as a container and handles data fetching using the useDatasetDetails hook.
  * 
  * @param params.id - The dataset ID from the URL
  */
@@ -25,7 +25,7 @@ export default function DatasetDetailPage() {
   const datasetId = params.id as string;
   
   // Use our custom hook to fetch dataset data
-  const { dataset, isLoading, error, refetch } = useDataset(datasetId);
+  const { dataset, isLoading, error, refetch } = useDatasetDetails(datasetId);
   
   // Handle navigation back to datasets list
   const handleBack = () => {

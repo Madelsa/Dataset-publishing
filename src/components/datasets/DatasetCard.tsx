@@ -16,7 +16,7 @@
 
 'use client';
 
-import { FiFile, FiClock, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiFile, FiClock, FiEdit2, FiTrash2, FiCheckSquare } from 'react-icons/fi';
 import Link from 'next/link';
 import { Dataset, DatasetListItem, MetadataStatus } from '@/types/dataset.types';
 import { formatDate, formatFileSize } from '@/utils/formatting';
@@ -35,12 +35,23 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
     createdAt,
   } = dataset;
   
+  // Check publication status first (for rejected)
+  const isRejected = 'publicationStatus' in dataset && dataset.publicationStatus === 'REJECTED';
+  
   // Get metadata status
-  const metadataStatus = 'metadataStatus' in dataset 
+  let displayStatus = isRejected ? 'REJECTED' : 'metadataStatus' in dataset 
     ? dataset.metadataStatus 
     : 'hasMetadata' in dataset && dataset.hasMetadata
-      ? 'EDITED' // Best approximation for DatasetListItem
-      : 'PENDING';
+      ? 'EDITED' // Show as "Pending Review" for DatasetListItem with metadata
+      : 'PENDING'; // Show as "Needs Metadata" 
+  
+  // Simplify GENERATED to match our simplified statuses
+  if (displayStatus === 'GENERATED') {
+    displayStatus = 'PENDING'; // Show as "Needs Metadata"
+  }
+
+  // Check if dataset has "Pending Review" status
+  const isPendingReview = displayStatus === 'EDITED';
   
   // Check if the dataset object has the hasMetadata property
   const hasMetadata = 'hasMetadata' in dataset 
@@ -110,6 +121,18 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
               </Link>
             )}
             
+            {/* Review button - only shown for datasets with "Pending Review" status */}
+            {isPendingReview && (
+              <Link 
+                href={`/datasets/${id}/review`}
+                className="text-purple-600 hover:text-purple-700 p-1.5 rounded-full hover:bg-gray-50"
+                title="Review dataset"
+              >
+                <FiCheckSquare className="h-5 w-5" />
+                <span className="sr-only">Review</span>
+              </Link>
+            )}
+            
             {onDelete && (
               <button
                 onClick={handleDelete}
@@ -137,11 +160,11 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
         </div>
         
         <div className="mt-4 flex items-center justify-between">
-          <StatusBadge status={metadataStatus} />
+          <StatusBadge status={displayStatus as any} />
           
-          {/* Add publication status badge if available */}
-          {'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED' && (
-            <StatusBadge status="PUBLISHED" className="ml-2" />
+          {/* Only show PUBLISHED status separately if not already showing REJECTED */}
+          {!isRejected && 'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED' && (
+            <StatusBadge status="APPROVED" className="ml-2" />
           )}
         </div>
       </div>
