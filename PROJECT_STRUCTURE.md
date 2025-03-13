@@ -16,13 +16,22 @@ Dataset-publishing/
 │   │   │   └── datasets/    # Dataset-related API routes
 │   │   │       ├── upload/  # File upload endpoint
 │   │   │       └── [id]/    # Dataset-specific operations
-│   │   │           └── metadata/ # Metadata operations
+│   │   │           ├── metadata/ # Metadata operations
+│   │   │           └── publish/  # Publication workflow operations
 │   │   ├── (routes)/        # Page routes and layouts
+│   │   │   └── datasets/    # Dataset-related pages
+│   │   │       └── [id]/    # Dataset detail pages
+│   │   │           ├── review/  # Review page for dataset approval
+│   │   │           └── metadata/ # Metadata editor page
 │   │   ├── context/         # React context providers
 │   │   ├── globals.css      # Global CSS styles
 │   │   └── layout.tsx       # Root layout component
 │   ├── components/          # Reusable React components
 │   │   ├── datasets/        # Dataset-specific components
+│   │   │   ├── DatasetCard.tsx  # Dataset card component
+│   │   │   ├── DatasetDetail.tsx # Dataset detail component
+│   │   │   ├── StatusBadge.tsx  # Status badge component
+│   │   │   └── detail/      # Detail view components
 │   │   ├── layout/          # Layout components (header, footer, etc.)
 │   │   └── ui/              # Generic UI components (buttons, inputs, etc.)
 │   │       ├── Button.tsx   # Reusable button component
@@ -30,10 +39,15 @@ Dataset-publishing/
 │   │       └── Header.tsx   # Header component
 │   ├── constants/           # Application constants and configuration
 │   │   └── index.ts         # Centralized constants
+│   ├── hooks/               # Custom React hooks
+│   │   ├── useDatasetDetails.ts # Hook for fetching dataset details
+│   │   └── useFilteredDatasets.ts # Hook for filtering datasets
 │   ├── lib/                 # Core libraries and initialization
 │   │   ├── prisma.ts        # Prisma client singleton
 │   │   └── aiMetadata.ts    # AI integration for metadata
 │   ├── services/            # Business logic services
+│   │   ├── api/             # API service wrappers
+│   │   │   └── datasets.ts  # Dataset API service
 │   │   ├── datasetService.ts # Dataset-related services
 │   │   ├── fileService.ts   # File processing services
 │   │   └── metadataService.ts # Metadata generation services
@@ -43,6 +57,8 @@ Dataset-publishing/
 │   │   ├── file.types.ts    # File-related types
 │   │   └── metadata.types.ts # Metadata-related types
 │   └── utils/               # Utility functions
+│       ├── api.utils.ts     # API utility functions
+│       ├── dataset.utils.ts # Dataset utility functions
 │       ├── formatting.ts    # Text and data formatting utilities
 │       ├── validation.ts    # Input validation utilities
 │       └── errorHandling.ts # Error handling utilities
@@ -71,8 +87,9 @@ The codebase separates concerns by:
 Components and services are organized by domain or feature:
 
 - **Dataset**: Components and services for dataset management
-- **File**: Components and services for file upload and processing
 - **Metadata**: Components and services for metadata generation and editing
+- **Review**: Components and services for the review workflow
+- **File**: Components and services for file upload and processing
 
 ### 3. Layered Architecture
 
@@ -164,6 +181,28 @@ export interface TypeName {
 }
 ```
 
+## Feature Implementation
+
+### 1. Dataset Management
+
+- **Upload**: File upload with validation and parsing
+- **Listing**: Dataset grid with filtering and search
+- **Details**: Comprehensive dataset information display
+
+### 2. Metadata Management
+
+- **AI Generation**: Automated metadata generation using Gemini AI
+- **Editing**: User-friendly metadata editor
+- **Language Support**: Multilingual metadata (English, Arabic)
+
+### 3. Review Workflow
+
+- **Status Tracking**: Simplified status badges (Needs Metadata, Pending Review, Approved, Rejected)
+- **Review Interface**: Dedicated review page for datasets
+- **Approval Process**: Dataset approval with optional feedback
+- **Rejection Handling**: Dataset rejection with required feedback
+- **Status Updates**: Automatic status updates based on user actions
+
 ## Constants and Configuration
 
 - Application constants are organized by domain in dedicated files:
@@ -177,7 +216,7 @@ export interface TypeName {
 ## Error Handling
 
 - Error handling is consistent across the application via the `errorHandling.ts` utility
-- API responses have a standard format
+- API responses have a standard format using createErrorResponse/createSuccessResponse
 - Client-side errors use toast notifications
 - All errors are logged with contextual information
 

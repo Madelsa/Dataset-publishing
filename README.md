@@ -10,6 +10,9 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 - AI-powered metadata generation in multiple languages
 - PostgreSQL database integration for storing dataset information
 - Responsive UI with TailwindCSS
+- Simplified status badges for clear workflow status
+- Dataset review workflow with approval/rejection
+- Feedback system for reviewers
 
 ## Technology Stack
 
@@ -113,9 +116,16 @@ A web application for uploading, processing, and publishing datasets in CSV and 
    - The system automatically generates metadata using AI
    - Toggle between English and Arabic languages
    - Edit the generated metadata as needed
-   - Save as draft or publish
+   - Save as draft or submit for review
 
-3. **View Database Contents with Prisma Studio**
+3. **Review Workflow**
+
+   - Datasets with completed metadata can be submitted for review
+   - Reviewers can approve or reject datasets
+   - Feedback can be provided during approval or rejection
+   - Status badges indicate the current state of each dataset
+
+4. **View Database Contents with Prisma Studio**
    - Run the following command to open Prisma Studio:
      ```bash
      npx prisma studio
@@ -137,9 +147,11 @@ The application uses Google's Gemini 1.5 Flash model to generate metadata for da
   - `FileUpload.tsx` - Component for uploading files
   - `DatasetInfo.tsx` - Component for displaying dataset information
   - `MetadataEditor.tsx` - Component for editing AI-generated metadata
+  - `StatusBadge.tsx` - Component for displaying workflow status
 - `src/app/api/datasets/` - API routes
   - `upload/route.ts` - API endpoint for file uploads
   - `[id]/metadata/route.ts` - API endpoint for metadata operations
+  - `[id]/publish/route.ts` - API endpoint for publication workflow
 - `src/lib/` - Utility functions
   - `prisma.ts` - Prisma client singleton
   - `aiMetadata.ts` - AI integration for metadata
@@ -147,6 +159,10 @@ The application uses Google's Gemini 1.5 Flash model to generate metadata for da
   - `datasetService.ts` - Dataset management services
   - `fileService.ts` - File parsing and validation services
   - `metadataService.ts` - Metadata generation services
+- `src/utils/` - Utility functions
+  - `formatting.ts` - Text and data formatting utilities
+  - `dataset.utils.ts` - Dataset-specific utilities
+  - `api.utils.ts` - API response utilities
 - `prisma/` - Database schema and migrations
   - `schema.prisma` - Prisma schema for Dataset and FileMetadata models
 
@@ -164,9 +180,12 @@ The application uses Google's Gemini 1.5 Flash model to generate metadata for da
 - `metadataLanguage` - Language of metadata ('en' or 'ar')
 - `metadataStatus` - Status of metadata (PENDING, GENERATED, EDITED, APPROVED)
 - `metadataDraft` - Current draft of metadata being edited
+- `publicationStatus` - Status of publication workflow (DRAFT, PENDING_REVIEW, REJECTED, PUBLISHED)
+- `reviewComment` - Feedback from reviewers
 - `fileMetadata` - One-to-one relation to FileMetadata
 - `createdAt` - Timestamp of creation
 - `updatedAt` - Timestamp of last update
+- `publishedAt` - Timestamp of publication
 
 ### FileMetadata
 
@@ -221,30 +240,6 @@ After schema changes, regenerate the Prisma client:
 npx prisma generate
 ```
 
-### Database Seeding
-
-To populate your database with sample data:
-
-```bash
-npx prisma db seed
-```
-
-Note: To enable seeding, add a seed script to your package.json:
-
-```json
-"prisma": {
-  "seed": "ts-node prisma/seed.ts"
-}
-```
-
-### Database Introspection
-
-If you have an existing database and want to generate a Prisma schema from it:
-
-```bash
-npx prisma db pull
-```
-
 ## Development
 
 To make changes to the database schema, modify the `prisma/schema.prisma` file and run:
@@ -259,7 +254,9 @@ To reset your development database (caution: this will delete all data):
 npx prisma migrate reset
 ```
 
-## Mini-Task 1 Requirements Completion
+## Requirements Completion
+
+### Mini-Task 1: File Upload and Processing
 
 - ✅ File upload component for CSV and Excel files
 - ✅ Service for parsing and validating files
@@ -267,9 +264,16 @@ npx prisma migrate reset
 - ✅ Error handling
 - ✅ Database schema for datasets
 
-## Mini-Task 2 Requirements Completion
+### Mini-Task 2: AI Metadata Generation
 
 - ✅ AI-powered metadata generation for datasets
 - ✅ Support for multiple languages (English, Arabic)
 - ✅ Metadata editor with language switching
 - ✅ Metadata persistence in database
+
+### Mini-Task 3: Review Workflow
+
+- ✅ Simplified status badges (Needs Metadata, Pending Review, Approved, Rejected)
+- ✅ Review interface for datasets with "Pending Review" status
+- ✅ Approval and rejection functionality with feedback
+- ✅ Status tracking across the workflow
