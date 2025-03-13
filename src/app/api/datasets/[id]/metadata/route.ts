@@ -17,8 +17,9 @@ export async function POST(
 ) {
   try {
     // Get the dataset with its file metadata
-    // Directly access params.id to fix Next.js 14+ warning
-    const dataset = await getDatasetById(params.id);
+    // Properly await params in Next.js 14+
+    const { id } = await Promise.resolve(params);
+    const dataset = await getDatasetById(id);
     
     if (!dataset) {
       return NextResponse.json(
@@ -62,7 +63,7 @@ export async function POST(
     );
     
     // Update the dataset with the generated metadata
-    const updatedDataset = await updateDatasetMetadata(params.id, metadata, language);
+    const updatedDataset = await updateDatasetMetadata(id, metadata, language);
     
     return NextResponse.json({
       message: 'Metadata generated successfully',
@@ -92,6 +93,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Properly await params in Next.js 14+
+    const { id } = await Promise.resolve(params);
     const body = await request.json();
     const { metadata, language = 'en' } = body;
     
@@ -104,9 +107,8 @@ export async function PUT(
     }
     
     // Update the dataset with the edited metadata
-    // Directly access params.id to fix Next.js 14+ warning
     const updatedDataset = await saveMetadataDraft(
-      params.id, 
+      id, 
       metadata as MetadataDraft, 
       language
     );
@@ -138,8 +140,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Directly access params.id to fix Next.js 14+ warning
-    const dataset = await getDatasetById(params.id);
+    // Properly await params in Next.js 14+
+    const { id } = await Promise.resolve(params);
+    const dataset = await getDatasetById(id);
     
     if (!dataset) {
       return NextResponse.json(

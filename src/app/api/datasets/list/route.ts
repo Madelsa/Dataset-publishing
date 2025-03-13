@@ -6,11 +6,21 @@ import { getAllDatasets } from '@/services/datasetService';
  * 
  * Purpose: Retrieve a list of all datasets
  * This endpoint returns all datasets with their basic information
+ * and adds a hasMetadata property based on metadata status
  */
 export async function GET(request: NextRequest) {
   try {
     const datasets = await getAllDatasets();
-    return NextResponse.json({ datasets });
+    
+    // Add hasMetadata property to each dataset
+    const enhancedDatasets = datasets.map(dataset => ({
+      ...dataset,
+      hasMetadata: dataset.metadataStatus === 'GENERATED' || 
+                   dataset.metadataStatus === 'EDITED' || 
+                   dataset.metadataStatus === 'APPROVED'
+    }));
+    
+    return NextResponse.json({ datasets: enhancedDatasets });
   } catch (error) {
     console.error('Error fetching datasets:', error);
     return NextResponse.json(

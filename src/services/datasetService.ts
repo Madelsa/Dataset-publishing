@@ -165,4 +165,22 @@ export async function saveMetadataDraft(
       metadataStatus: 'EDITED'
     }
   });
+}
+
+/**
+ * Delete a dataset by ID
+ * 
+ * Removes a dataset and its associated file metadata from the database.
+ * Uses Prisma's cascading delete to automatically remove related records.
+ * 
+ * @param id - The unique identifier of the dataset to delete
+ * @returns The deleted dataset
+ */
+export async function deleteDataset(id: string): Promise<Dataset> {
+  return prisma.dataset.delete({
+    where: { id },
+    include: {
+      fileMetadata: true
+    }
+  });
 } 

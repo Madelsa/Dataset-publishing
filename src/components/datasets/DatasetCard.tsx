@@ -97,7 +97,7 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
             {onDelete && (
               <button
                 onClick={handleDelete}
-                className="text-red-600 hover:text-red-700 p-1.5 rounded-full hover:bg-gray-50"
+                className="text-red-600 hover:text-red-700 p-1.5 rounded-full hover:bg-gray-50 cursor-pointer"
                 title="Delete dataset"
               >
                 <FiTrash2 className="h-5 w-5" />

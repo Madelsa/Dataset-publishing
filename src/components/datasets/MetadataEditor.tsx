@@ -18,6 +18,7 @@
 import { useState, useEffect } from 'react';
 import { useMetadata } from '@/app/context/MetadataContext';
 import { FiSave, FiGlobe, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 
 interface MetadataEditorProps {
   datasetId: string;
@@ -27,6 +28,8 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
   const { state, dispatch, generateMetadata, saveDraft } = useMetadata();
   const [initialLoad, setInitialLoad] = useState(true);
   const [tagInput, setTagInput] = useState('');
+  const router = useRouter();
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   /**
    * Load initial metadata from the API on component mount
@@ -78,6 +81,14 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
     await saveDraft(datasetId);
+    
+    // Show success message
+    setSaveSuccess(true);
+    
+    // Redirect to the datasets page after a short delay
+    setTimeout(() => {
+      router.push('/');
+    }, 1500);
   };
   
   /**
@@ -87,9 +98,17 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
    * @param language - The language to switch to ('en' or 'ar')
    */
   const handleLanguageChange = (language: 'en' | 'ar') => {
-    dispatch({ type: 'SET_LANGUAGE', payload: language });
-    // Generate new metadata for the selected language
-    generateMetadata(datasetId, language);
+    // Only proceed if the selected language is different from the current one
+    if (language !== state.language) {
+      dispatch({ type: 'SET_LANGUAGE', payload: language });
+      
+      // Set loading state to indicate regeneration is happening
+      setSaveSuccess(false);
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      // Generate new metadata for the selected language
+      generateMetadata(datasetId, language);
+    }
   };
   
   /**
@@ -114,7 +133,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
   };
   
   /**
-   * Add a new tag to the keywords list
+   * Add a new tag to the tags list
    * Validates that the tag is not empty and not already in the list
    */
   const addTag = () => {
@@ -123,25 +142,25 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
     const tag = tagInput.trim();
     if (!tag) return;
     
-    const currentTags = state.draft.keywords || [];
+    const currentTags = state.draft.tags || [];
     if (!currentTags.includes(tag)) {
-      updateDraftField('keywords', [...currentTags, tag]);
+      updateDraftField('tags', [...currentTags, tag]);
     }
     
     setTagInput('');
   };
   
   /**
-   * Remove a tag from the keywords list
+   * Remove a tag from the tags list
    * 
    * @param index - The index of the tag to remove
    */
   const removeTag = (index: number) => {
-    if (!state.draft?.keywords) return;
+    if (!state.draft?.tags) return;
     
-    const newTags = [...state.draft.keywords];
+    const newTags = [...state.draft.tags];
     newTags.splice(index, 1);
-    updateDraftField('keywords', newTags);
+    updateDraftField('tags', newTags);
   };
   
   return (
@@ -155,7 +174,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
           <button
             type="button"
             onClick={() => handleLanguageChange('en')}
-            className={`px-3 py-1 rounded-md ${
+            className={`px-3 py-1 rounded-md cursor-pointer ${
               state.language === 'en' 
                 ? 'bg-indigo-100 text-indigo-700' 
                 : 'bg-gray-50 text-gray-500'
@@ -167,7 +186,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
           <button
             type="button"
             onClick={() => handleLanguageChange('ar')}
-            className={`px-3 py-1 rounded-md ${
+            className={`px-3 py-1 rounded-md cursor-pointer ${
               state.language === 'ar' 
                 ? 'bg-indigo-100 text-indigo-700' 
                 : 'bg-gray-50 text-gray-500'
@@ -183,6 +202,19 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md flex items-center text-red-800">
           <FiAlertCircle className="h-5 w-5 mr-2" />
           {state.error}
+        </div>
+      )}
+      
+      {saveSuccess && (
+        <div className="px-6 py-4 bg-green-50 border-b border-green-200">
+          <div className="flex items-start space-x-3">
+            <FiSave className="h-5 w-5 text-green-500 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-green-800">
+                Metadata saved successfully! Redirecting to datasets page...
+              </p>
+            </div>
+          </div>
         </div>
       )}
       
@@ -205,24 +237,6 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder={state.language === 'ar' ? 'أدخل عنوانًا' : 'Enter title'}
               />
-              
-              {state.suggested?.title && state.suggested.title !== state.draft?.title && (
-                <div className="mt-1">
-                  <p className="text-xs text-gray-500">
-                    {state.language === 'ar' ? 'اقتراح:' : 'Suggestion:'}
-                  </p>
-                  <div className="mt-1 text-sm p-2 bg-gray-50 border border-gray-200 rounded-md">
-                    {state.suggested.title}
-                    <button
-                      type="button"
-                      onClick={() => updateDraftField('title', state.suggested.title)}
-                      className="ml-2 text-xs text-indigo-600 hover:text-indigo-800"
-                    >
-                      {state.language === 'ar' ? 'استخدم هذا' : 'Use this'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
             
             {/* Description */}
@@ -237,39 +251,21 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder={state.language === 'ar' ? 'أدخل وصفًا' : 'Enter description'}
               />
-              
-              {state.suggested?.description && state.suggested.description !== state.draft?.description && (
-                <div className="mt-1">
-                  <p className="text-xs text-gray-500">
-                    {state.language === 'ar' ? 'اقتراح:' : 'Suggestion:'}
-                  </p>
-                  <div className="mt-1 text-sm p-2 bg-gray-50 border border-gray-200 rounded-md">
-                    {state.suggested.description}
-                    <button
-                      type="button"
-                      onClick={() => updateDraftField('description', state.suggested.description)}
-                      className="ml-2 text-xs text-indigo-600 hover:text-indigo-800"
-                    >
-                      {state.language === 'ar' ? 'استخدم هذا' : 'Use this'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
             
-            {/* Keywords/Tags */}
+            {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {state.language === 'ar' ? 'الكلمات المفتاحية' : 'Keywords'}
+                {state.language === 'ar' ? 'العلامات' : 'Tags'}
               </label>
               
               <div className="flex flex-wrap gap-2 mb-2">
-                {state.draft?.keywords?.map((keyword, index) => (
+                {state.draft?.tags?.map((tag, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
                   >
-                    {keyword}
+                    {tag}
                     <button
                       type="button"
                       onClick={() => removeTag(index)}
@@ -287,7 +283,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder={state.language === 'ar' ? 'أضف كلمة مفتاحية' : 'Add a keyword'}
+                  placeholder={state.language === 'ar' ? 'أضف علامة' : 'Add a tag'}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -303,30 +299,6 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
                   {state.language === 'ar' ? 'إضافة' : 'Add'}
                 </button>
               </div>
-              
-              {state.suggested?.tags && state.suggested.tags.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-xs text-gray-500">
-                    {state.language === 'ar' ? 'اقتراحات:' : 'Suggestions:'}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {state.suggested.tags.map((tag, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => {
-                          if (state.draft?.keywords && !state.draft.keywords.includes(tag)) {
-                            updateDraftField('keywords', [...state.draft.keywords, tag]);
-                          }
-                        }}
-                        className="px-2 py-0.5 text-xs border border-gray-200 rounded-full hover:bg-gray-50 text-gray-700"
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
             
             {/* Category */}
@@ -341,24 +313,6 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder={state.language === 'ar' ? 'أدخل الفئة' : 'Enter category'}
               />
-              
-              {state.suggested?.category && state.suggested.category !== state.draft?.category && (
-                <div className="mt-1">
-                  <p className="text-xs text-gray-500">
-                    {state.language === 'ar' ? 'اقتراح:' : 'Suggestion:'}
-                  </p>
-                  <div className="mt-1 text-sm p-2 bg-gray-50 border border-gray-200 rounded-md">
-                    {state.suggested.category}
-                    <button
-                      type="button"
-                      onClick={() => updateDraftField('category', state.suggested.category)}
-                      className="ml-2 text-xs text-indigo-600 hover:text-indigo-800"
-                    >
-                      {state.language === 'ar' ? 'استخدم هذا' : 'Use this'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
             
             <div className="flex justify-between pt-4">

@@ -154,10 +154,9 @@ export function MetadataProvider({ children }: MetadataProviderProps) {
       dispatch({ type: 'SET_SUGGESTED', payload: data.metadata });
       dispatch({ type: 'SET_STATUS', payload: 'GENERATED' });
       
-      // Initialize draft with suggestions if no draft exists
-      if (!state.draft) {
-        dispatch({ type: 'SET_DRAFT', payload: data.metadata });
-      }
+      // Always update the draft with the new metadata when language changes
+      // This ensures draft content is updated with the correct language
+      dispatch({ type: 'SET_DRAFT', payload: data.metadata });
       
     } catch (error) {
       dispatch({ 
