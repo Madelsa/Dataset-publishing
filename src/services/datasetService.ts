@@ -10,6 +10,26 @@ import { Dataset, ProcessedFile } from '@/types/dataset.types';
 import { MetadataDraft, MetadataSuggestion, MetadataStatus } from '@/types/metadata.types';
 
 /**
+ * Common fileMetadata selection pattern used across queries
+ */
+const FILE_METADATA_INCLUDE = {
+  fileMetadata: {
+    select: {
+      id: true,
+      datasetId: true,
+      originalName: true,
+      fileSize: true,
+      fileType: true,
+      rowCount: true,
+      columnNames: true,
+      sampleData: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  }
+};
+
+/**
  * Create a new dataset
  * 
  * Creates a dataset record in the database with associated file metadata.
@@ -196,7 +216,7 @@ export async function updateDatasetMetadata(
  * Save metadata draft
  * 
  * Saves user-edited metadata draft to a dataset and updates its status.
- * Sets the metadata status to EDITED.
+ * Sets the metadata status to EDITED and resets publication status if needed.
  * 
  * @param id - The unique identifier of the dataset
  * @param draft - The user-edited metadata draft
@@ -208,16 +228,36 @@ export async function saveMetadataDraft(
   draft: MetadataDraft,
   language: string = 'en'
 ): Promise<Dataset> {
+  // First, get the current dataset to check its status
+  const currentDataset = await getDatasetById(id);
+  
+  if (!currentDataset) {
+    throw new Error('Dataset not found');
+  }
+  
+  // Prepare update data
+  const updateData: any = {
+    metadataDraft: draft as any,
+    metadataLanguage: language,
+    metadataStatus: 'EDITED' as MetadataStatus
+  };
+  
+  // Reset publication status if the dataset was previously
+  // rejected or published (approved)
+  if (currentDataset.publicationStatus === 'REJECTED' || 
+      currentDataset.publicationStatus === 'PUBLISHED') {
+    updateData.publicationStatus = 'DRAFT';
+    // Clear any previous review comments when status changes
+    updateData.reviewComment = null;
+  }
+  
   const result = await prisma.dataset.update({
     where: { id },
-    data: {
-      metadataDraft: draft as any,
-      metadataLanguage: language,
-      metadataStatus: 'EDITED' as MetadataStatus
-    }
+    data: updateData,
+    include: FILE_METADATA_INCLUDE
   });
   
-  return result as unknown as Dataset;
+  return result as Dataset;
 }
 
 /**
@@ -238,4 +278,53 @@ export async function deleteDataset(id: string): Promise<Dataset> {
   });
   
   return result as unknown as Dataset;
+}
+
+/**
+ * Update dataset publication status
+ * 
+ * Updates a dataset's publication status, metadata status, and related fields
+ * Used for the publication workflow (submit for review, approve, reject)
+ * 
+ * @param id - The unique identifier of the dataset
+ * @param publicationStatus - The new publication status
+ * @param reviewComment - Optional reviewer comment
+ * @returns The updated dataset
+ */
+export async function updateDatasetPublicationStatus(
+  id: string,
+  publicationStatus: string,
+  reviewComment?: string
+): Promise<Dataset> {
+  interface DatasetUpdateFields {
+    publicationStatus: string;
+    metadataStatus?: string;
+    publishedAt?: Date;
+    reviewComment?: string | null;
+  }
+  
+  const updateData: DatasetUpdateFields = {
+    publicationStatus,
+  };
+  
+  // Update metadata status based on publication status
+  if (publicationStatus === 'PUBLISHED') {
+    updateData.metadataStatus = 'APPROVED';
+    updateData.publishedAt = new Date();
+  } else if (publicationStatus === 'REJECTED') {
+    updateData.metadataStatus = 'EDITED';
+  }
+  
+  // Add reviewer comment if provided
+  if (reviewComment !== undefined) {
+    updateData.reviewComment = reviewComment;
+  }
+  
+  const result = await prisma.dataset.update({
+    where: { id },
+    data: updateData,
+    include: FILE_METADATA_INCLUDE
+  });
+  
+  return result as Dataset;
 } 

@@ -20,6 +20,7 @@ import { FiFile, FiClock, FiEdit2, FiTrash2, FiCheckSquare } from 'react-icons/f
 import Link from 'next/link';
 import { Dataset, DatasetListItem, MetadataStatus } from '@/types/dataset.types';
 import { formatDate, formatFileSize } from '@/utils/formatting';
+import { getDisplayStatus } from '@/utils/dataset.utils';
 import StatusBadge from './StatusBadge';
 
 interface DatasetCardProps {
@@ -35,25 +36,8 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
     createdAt,
   } = dataset;
   
-  // Check publication status first (for rejected and approved)
-  const isRejected = 'publicationStatus' in dataset && dataset.publicationStatus === 'REJECTED';
-  const isPublished = 'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED';
-  
-  // Get metadata status
-  let displayStatus = isRejected 
-    ? 'REJECTED' 
-    : isPublished 
-      ? 'APPROVED' 
-      : 'metadataStatus' in dataset 
-        ? dataset.metadataStatus 
-        : 'hasMetadata' in dataset && dataset.hasMetadata
-          ? 'EDITED' // Show as "Pending Review" for DatasetListItem with metadata
-          : 'PENDING'; // Show as "Needs Metadata" 
-  
-  // Simplify GENERATED to match our simplified statuses
-  if (displayStatus === 'GENERATED') {
-    displayStatus = 'PENDING'; // Show as "Needs Metadata"
-  }
+  // Get the display status using our utility function
+  const displayStatus = getDisplayStatus(dataset);
 
   // Check if dataset has "Pending Review" status
   const isPendingReview = displayStatus === 'EDITED';

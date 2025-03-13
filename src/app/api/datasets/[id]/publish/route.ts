@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getDatasetById } from '@/services/datasetService';
+import { NextRequest } from 'next/server';
+import { getDatasetById, updateDatasetPublicationStatus } from '@/services/datasetService';
 import { PublicationStatus } from '@/types/dataset.types';
+import { enhanceDataset } from '@/utils/dataset.utils';
+import { createErrorResponse, createSuccessResponse } from '@/utils/api.utils';
 
 /**
  * API Route: PUT /api/datasets/[id]/publish
@@ -21,7 +23,7 @@ export async function PUT(
     // Get dataset to ensure it exists
     const dataset = await getDatasetById(id);
     if (!dataset) {
-      return NextResponse.json({ error: 'Dataset not found' }, { status: 404 });
+      return createErrorResponse('NOT_FOUND', 'Dataset not found');
     }
     
     // Parse the request body to get publication status update
@@ -30,90 +32,25 @@ export async function PUT(
     
     // Validate the publication status
     if (!publicationStatus || !['DRAFT', 'PENDING_REVIEW', 'REJECTED', 'PUBLISHED'].includes(publicationStatus)) {
-      return NextResponse.json(
-        { error: 'Invalid publication status' }, 
-        { status: 400 }
-      );
+      return createErrorResponse('BAD_REQUEST', 'Invalid publication status');
     }
     
-    // Update the dataset publication status in the database
+    // Update the dataset publication status in the database using our service function
     const updatedDataset = await updateDatasetPublicationStatus(
       id, 
       publicationStatus as PublicationStatus,
       reviewComment
     );
     
-    return NextResponse.json({ dataset: updatedDataset });
+    // Enhance the dataset with computed properties
+    const enhancedDataset = enhanceDataset(updatedDataset);
+    
+    return createSuccessResponse({ dataset: enhancedDataset });
   } catch (error) {
     console.error('Error updating publication status:', error);
-    return NextResponse.json(
-      { error: 'Error updating publication status' },
-      { status: 500 }
+    return createErrorResponse(
+      'INTERNAL_SERVER_ERROR',
+      'Error updating publication status'
     );
   }
-}
-
-/**
- * Update dataset publication status
- * 
- * Updates a dataset's publication status and related fields
- * 
- * @param id - Dataset ID
- * @param status - New publication status
- * @param comment - Optional review comment
- * @returns Updated dataset
- */
-async function updateDatasetPublicationStatus(
-  id: string,
-  status: PublicationStatus,
-  comment?: string
-) {
-  // Import prisma dynamically to avoid issues with Next.js API routes
-  const { prisma } = await import('@/lib/prisma');
-  
-  const updateData: any = {
-    publicationStatus: status,
-  };
-  
-  // Add publishedAt timestamp for PUBLISHED status
-  if (status === 'PUBLISHED') {
-    updateData.publishedAt = new Date();
-  }
-  
-  // Add review comment if provided
-  if (comment !== undefined) {
-    updateData.reviewComment = comment;
-  }
-  
-  // Update dataset in database
-  const result = await prisma.dataset.update({
-    where: { id },
-    data: updateData,
-    include: {
-      fileMetadata: {
-        select: {
-          id: true,
-          datasetId: true,
-          originalName: true,
-          fileSize: true,
-          fileType: true,
-          rowCount: true,
-          columnNames: true,
-          sampleData: true,
-          createdAt: true,
-          updatedAt: true
-        }
-      }
-    }
-  });
-  
-  // Add hasMetadata property based on metadata status
-  const enhancedDataset = {
-    ...result,
-    hasMetadata: result.metadataStatus === 'GENERATED' || 
-                 result.metadataStatus === 'EDITED' || 
-                 result.metadataStatus === 'APPROVED'
-  };
-  
-  return enhancedDataset;
 } 

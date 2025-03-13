@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDatasetById, updateDatasetMetadata, saveMetadataDraft } from '@/services/datasetService';
 import { generateMetadata } from '@/services/metadataService';
 import { MetadataDraft, MetadataResponse } from '@/types/dataset.types';
+import { enhanceDataset } from '@/utils/dataset.utils';
 
 /**
  * API Route: POST /api/datasets/[id]/metadata
@@ -113,9 +114,12 @@ export async function PUT(
       language
     );
     
+    // Enhance the dataset with computed properties
+    const enhancedDataset = enhanceDataset(updatedDataset);
+    
     return NextResponse.json({
       message: 'Metadata updated successfully',
-      dataset: updatedDataset
+      dataset: enhancedDataset
     });
     
   } catch (error: any) {
