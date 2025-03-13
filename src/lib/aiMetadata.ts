@@ -1,12 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GEMINI_MODEL, PROMPT_TEMPLATES } from "@/constants/ai";
+import { GEMINI_API_KEY } from "@/constants/env";
+import { MAX_SAMPLE_ROWS } from "@/constants/uploads";
 
 // Initialize the Gemini API
-// In production, this should be an environment variable
-const API_KEY = process.env.GEMINI_API_KEY || "YOUR_API_KEY"; 
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-// Use the more efficient Gemini 1.5 Flash model
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// Use the model defined in constants
+const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
 interface MetadataSuggestion {
   title: string;
@@ -30,8 +31,8 @@ export async function generateMetadata(
 ): Promise<MetadataSuggestion> {
   try {
     // Create a sample of the dataset for the AI to analyze
-    // Limit to 10 rows and 100KB to stay within API limits
-    const sampleRows = Math.min(data.length, 10);
+    // Limit to MAX_SAMPLE_ROWS and 100KB to stay within API limits
+    const sampleRows = Math.min(data.length, MAX_SAMPLE_ROWS);
     const sample = data.slice(0, sampleRows);
     
     // Format the data for the prompt
@@ -48,28 +49,13 @@ export async function generateMetadata(
       dataPreview += '\n';
     });
     
-    // Create the prompt based on language
-    const prompt = language === 'ar' 
-      ? `تحليل مجموعة البيانات التالية وتوليد البيانات الوصفية:
-         ${dataPreview}
-         
-         بناءً على معاينة مجموعة البيانات أعلاه، قم بإنشاء ما يلي:
-         1. عنوان موجز ووصفي
-         2. وصف مفصل يشرح محتويات مجموعة البيانات
-         3. 3-5 علامات أو كلمات مفتاحية ذات صلة
-         4. الفئة التي تناسب هذه البيانات بشكل أفضل
-         
-         قم بتنسيق إجابتك في تنسيق JSON مع المفاتيح: title، description، tags، category`
-      : `Analyze the following dataset and generate metadata:
-         ${dataPreview}
-         
-         Based on the dataset preview above, generate the following:
-         1. A concise, descriptive title
-         2. A detailed description explaining what this dataset contains
-         3. 3-5 relevant tags or keywords
-         4. A category that best fits this data
-         
-         Format your response as JSON with keys: title, description, tags, category`;
+    // Create the prompt based on language using the template
+    const promptTemplate = language === 'ar' 
+      ? PROMPT_TEMPLATES.ARABIC
+      : PROMPT_TEMPLATES.ENGLISH;
+    
+    // Replace the placeholder with the actual data preview
+    const prompt = promptTemplate.replace('{{dataPreview}}', dataPreview);
 
     // Send the prompt to Gemini
     const result = await model.generateContent(prompt);

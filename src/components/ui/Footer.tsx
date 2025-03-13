@@ -15,7 +15,7 @@ export default function Footer() {
           
           <div className="mt-4 sm:mt-0">
             <a 
-              href="https://github.com/yourusername/dataset-publishing-platform" 
+              href="https://github.com/Madelsa/Dataset-publishing" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center text-gray-500 hover:text-gray-700 text-sm"

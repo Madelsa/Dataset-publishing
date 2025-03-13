@@ -36,7 +36,11 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
    * Fetches both suggested and draft metadata if available
    */
   useEffect(() => {
-    if (initialLoad && datasetId) {
+    // Reset metadata when datasetId changes to prevent old data showing up
+    dispatch({ type: 'RESET' });
+    setInitialLoad(true);
+    
+    if (datasetId) {
       // Load metadata from API
       const fetchMetadata = async () => {
         try {
@@ -72,7 +76,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
       
       fetchMetadata();
     }
-  }, [datasetId, initialLoad, dispatch]);
+  }, [datasetId, dispatch]);
   
   /**
    * Handle form submission to save the current draft
@@ -319,7 +323,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
               <button
                 type="button"
                 onClick={handleRegenerateMetadata}
-                className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 flex items-center cursor-pointer"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center cursor-pointer"
               >
                 <FiRefreshCw className="mr-2 h-4 w-4" />
                 {state.language === 'ar' ? 'إعادة إنشاء البيانات الوصفية' : 'Regenerate Metadata'}

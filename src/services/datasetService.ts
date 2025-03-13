@@ -6,7 +6,8 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { Dataset, MetadataDraft, MetadataSuggestion, ProcessedFile } from '@/types/dataset.types';
+import { Dataset, ProcessedFile } from '@/types/dataset.types';
+import { MetadataDraft, MetadataSuggestion, MetadataStatus } from '@/types/metadata.types';
 
 /**
  * Create a new dataset
@@ -29,11 +30,11 @@ export async function createDataset(
     processedFile: ProcessedFile
   }
 ): Promise<Dataset> {
-  return prisma.dataset.create({
+  const result = await prisma.dataset.create({
     data: {
       name,
       description,
-      metadataStatus: 'PENDING',
+      metadataStatus: 'PENDING' as MetadataStatus,
       metadataLanguage: 'en',
       suggestedTags: [],
       fileMetadata: {
@@ -44,14 +45,29 @@ export async function createDataset(
           rowCount: fileData.processedFile.rowCount,
           columnNames: fileData.processedFile.columnNames,
           sampleData: fileData.processedFile.sampleData || undefined,
-          fullData: fileData.processedFile.fullData || undefined,
+          // No longer saving fullData as it's not needed for download functionality
         }
       }
     },
     include: {
-      fileMetadata: true
+      fileMetadata: {
+        select: {
+          id: true,
+          datasetId: true,
+          originalName: true,
+          fileSize: true,
+          fileType: true,
+          rowCount: true,
+          columnNames: true,
+          sampleData: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      }
     }
   });
+  
+  return result as unknown as Dataset;
 }
 
 /**
@@ -63,14 +79,30 @@ export async function createDataset(
  * @returns Array of all datasets with their file metadata
  */
 export async function getAllDatasets(): Promise<Dataset[]> {
-  return prisma.dataset.findMany({
+  const results = await prisma.dataset.findMany({
     include: {
-      fileMetadata: true
+      fileMetadata: {
+        select: {
+          id: true,
+          datasetId: true,
+          originalName: true,
+          fileSize: true,
+          fileType: true,
+          rowCount: true,
+          columnNames: true,
+          sampleData: true,
+          createdAt: true,
+          updatedAt: true
+          // Intentionally excluding fullData as it's not needed and can cause serialization issues
+        }
+      }
     },
     orderBy: {
       createdAt: 'desc'
     }
   });
+  
+  return results as unknown as Dataset[];
 }
 
 /**
@@ -83,12 +115,28 @@ export async function getAllDatasets(): Promise<Dataset[]> {
  * @returns The dataset with its file metadata, or null if not found
  */
 export async function getDatasetById(id: string): Promise<Dataset | null> {
-  return prisma.dataset.findUnique({
+  const result = await prisma.dataset.findUnique({
     where: { id },
     include: {
-      fileMetadata: true
+      fileMetadata: {
+        select: {
+          id: true,
+          datasetId: true,
+          originalName: true,
+          fileSize: true,
+          fileType: true,
+          rowCount: true,
+          columnNames: true,
+          sampleData: true,
+          createdAt: true,
+          updatedAt: true
+          // Intentionally excluding fullData as it's not needed and can cause serialization issues
+        }
+      }
     }
   });
+  
+  return result as unknown as Dataset | null;
 }
 
 /**
@@ -129,7 +177,7 @@ export async function updateDatasetMetadata(
   metadata: MetadataSuggestion,
   language: string = 'en'
 ): Promise<Dataset> {
-  return prisma.dataset.update({
+  const result = await prisma.dataset.update({
     where: { id },
     data: {
       suggestedTitle: metadata.title,
@@ -137,9 +185,11 @@ export async function updateDatasetMetadata(
       suggestedTags: metadata.tags,
       suggestedCategory: metadata.category,
       metadataLanguage: language,
-      metadataStatus: 'GENERATED'
+      metadataStatus: 'GENERATED' as MetadataStatus
     }
   });
+  
+  return result as unknown as Dataset;
 }
 
 /**
@@ -158,14 +208,16 @@ export async function saveMetadataDraft(
   draft: MetadataDraft,
   language: string = 'en'
 ): Promise<Dataset> {
-  return prisma.dataset.update({
+  const result = await prisma.dataset.update({
     where: { id },
     data: {
       metadataDraft: draft as any,
       metadataLanguage: language,
-      metadataStatus: 'EDITED'
+      metadataStatus: 'EDITED' as MetadataStatus
     }
   });
+  
+  return result as unknown as Dataset;
 }
 
 /**
@@ -178,10 +230,12 @@ export async function saveMetadataDraft(
  * @returns The deleted dataset
  */
 export async function deleteDataset(id: string): Promise<Dataset> {
-  return prisma.dataset.delete({
+  const result = await prisma.dataset.delete({
     where: { id },
     include: {
       fileMetadata: true
     }
   });
+  
+  return result as unknown as Dataset;
 } 

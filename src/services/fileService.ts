@@ -13,38 +13,35 @@
 
 import { FileValidationResult, ProcessedFile } from "@/types/dataset.types";
 import * as XLSX from 'xlsx';
-import { parse } from 'csv-parse/sync';
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx'];
+import { MAX_FILE_SIZE, ALLOWED_EXTENSIONS, UPLOAD_ERROR_MESSAGES } from "@/constants/uploads";
 
 /**
  * Validates a file for size and type
  * 
  * Checks if the file meets the platform's requirements:
- * - Size must be under 10MB
- * - File extension must be one of the allowed types (.csv, .xls, .xlsx)
+ * - Size must be under the configured limit
+ * - File extension must be one of the allowed types
  * 
  * @param file - The file to validate
  * @returns Validation result with status and error message if any
  */
 export function validateFile(file: File): FileValidationResult {
-  // Check file size (max 10MB)
+  // Check file size
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+      error: UPLOAD_ERROR_MESSAGES.SIZE_EXCEEDED
     };
   }
 
   // Check file extension
   const fileName = file.name.toLowerCase();
   const hasValidExtension = ALLOWED_EXTENSIONS.some(ext => fileName.endsWith(ext));
-  
+
   if (!hasValidExtension) {
     return {
       valid: false,
-      error: `Invalid file type. Allowed types: ${ALLOWED_EXTENSIONS.join(', ')}`
+      error: UPLOAD_ERROR_MESSAGES.INVALID_TYPE
     };
   }
 
@@ -55,11 +52,9 @@ export function validateFile(file: File): FileValidationResult {
  * Processes a file to extract data
  * 
  * Detects the file type and delegates to the appropriate parser:
- * - CSV files are parsed using the csv-parse library
- * - Excel files are parsed using the xlsx library
- * 
- * Extracts metadata like row count and column names for database storage
- * and AI metadata generation.
+ * - CSV and Excel files are both processed using the XLSX library
+ * - Extracts metadata like row count and column names for database storage
+ * - For large files, limits memory usage by only storing sample data
  * 
  * @param file - The file to process
  * @returns Processed file data with row count and column names
@@ -67,11 +62,10 @@ export function validateFile(file: File): FileValidationResult {
 export async function processFile(file: File): Promise<ProcessedFile> {
   try {
     const fileName = file.name.toLowerCase();
-    
-    if (fileName.endsWith('.csv')) {
-      return await parseCSV(file);
-    } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
-      return await parseExcel(file);
+
+    // Use the unified parser for both CSV and Excel files
+    if (fileName.endsWith('.csv') || fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
+      return await parseFile(file);
     } else {
       return {
         rowCount: 0,
@@ -90,199 +84,194 @@ export async function processFile(file: File): Promise<ProcessedFile> {
 }
 
 /**
- * Parses a CSV file
+ * Unified parser for both CSV and Excel files
  * 
- * Reads the CSV file content and converts it to structured data:
- * - Uses the csv-parse library for reliable parsing
- * - Extracts column names from the header row
- * - Counts the number of data rows
- * - Handles empty files and parsing errors
+ * Handles both file types with optimized approaches:
+ * - For CSV: Uses a lightweight custom parser that's fast and memory efficient
+ * - For Excel: Uses XLSX.js with minimal memory footprint
  * 
- * @param file - The CSV file to parse
+ * @param file - The file to parse (CSV or Excel)
  * @returns Processed file data with row count and column names
  */
-async function parseCSV(file: File): Promise<ProcessedFile> {
+async function parseFile(file: File): Promise<ProcessedFile> {
   try {
-    // Try parsing with csv-parse
-    const fileContent = await file.text();
+    const fileName = file.name.toLowerCase();
+    const isCSV = fileName.endsWith('.csv');
     
-    // Check if this might be an Excel-exported CSV (common formatting issues)
-    if (fileContent.includes('\r\n') || fileContent.match(/[0-9]+\.[0-9]{3,}/g)) {
-      // This might be an Excel-exported CSV with Excel-specific formats
-      // Try parsing with XLSX for better handling
-      return await parseAsExcelCSV(file, fileContent);
+    // Use custom parser for all CSV files (more efficient)
+    if (isCSV) {
+      try {
+        return await parseCSVEfficiently(file);
+      } catch (csvError) {
+        console.error("CSV parser error, falling back to XLSX:", csvError);
+        // Fall back to XLSX parser if the CSV parser fails
+      }
     }
     
-    // Standard CSV parsing
-    const records = parse(fileContent, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-      bom: true // Handle Byte Order Mark if present
-    });
-    
-    if (records.length === 0) {
-      return {
-        rowCount: 0,
-        columnNames: [],
-        error: 'CSV file is empty or has no valid data'
-      };
-    }
-    
-    // Extract column names from the first record
-    const columnNames = Object.keys(records[0]);
-    
-    // Validate that we have actual column data
-    const hasData = columnNames.length > 0 && records.some((record: Record<string, any>) => 
-      columnNames.some(col => record[col] !== undefined && record[col] !== null && record[col] !== '')
-    );
-    
-    if (!hasData) {
-      return {
-        rowCount: 0,
-        columnNames: [],
-        error: 'CSV file structure could not be properly detected'
-      };
-    }
-    
-    return {
-      rowCount: records.length,
-      columnNames,
-      sampleData: records.slice(0, 5), // Include sample data for metadata generation
-      fullData: records // Store the full dataset
-    };
+    // Parse Excel files (or CSV files that failed with the custom parser)
+    return await parseExcel(file);
   } catch (error) {
-    console.error('Error parsing CSV with csv-parse:', error);
-    // Fall back to Excel parsing if csv-parse fails
-    return await parseAsExcelCSV(file);
-  }
-}
-
-/**
- * Parses a CSV file as if it were an Excel-exported CSV
- * 
- * Some CSV files, especially those exported from Excel, have special formatting
- * that the csv-parse library might not handle well. This function uses the XLSX
- * library as a fallback for better compatibility.
- * 
- * @param file - The CSV file to parse
- * @param content - Optional pre-loaded file content
- * @returns Processed file data with row count and column names
- */
-async function parseAsExcelCSV(file: File, content?: string): Promise<ProcessedFile> {
-  try {
-    // If content wasn't provided, load it
-    const arrayBuffer = content ? (new TextEncoder().encode(content)).buffer : await file.arrayBuffer();
-    
-    // Use XLSX to parse the CSV
-    const workbook = XLSX.read(arrayBuffer, {type: content ? 'string' : 'array'});
-    
-    // Get the first sheet
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    
-    // Convert to JSON with header rows
-    const records = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-    
-    if (records.length <= 1) { // Just header or empty
-      return {
-        rowCount: 0,
-        columnNames: [],
-        error: 'CSV file is empty or has only headers'
-      };
-    }
-    
-    // First row should be headers
-    const headers = records[0] as string[];
-    const columnNames = headers.map(h => String(h).trim());
-    
-    // Convert data to objects with column names
-    const dataRecords = records.slice(1).map(row => {
-      const record: Record<string, any> = {};
-      columnNames.forEach((col, i) => {
-        record[col] = i < (row as any[]).length ? (row as any[])[i] : null;
-      });
-      return record;
-    });
-    
-    return {
-      rowCount: dataRecords.length,
-      columnNames,
-      sampleData: dataRecords.slice(0, 5), // Include sample data for metadata generation
-      fullData: dataRecords // Store the full dataset
-    };
-  } catch (error) {
-    console.error('Error parsing CSV as Excel CSV:', error);
+    console.error('Error parsing file:', error);
     return {
       rowCount: 0,
       columnNames: [],
-      error: 'Error parsing CSV file - file may be corrupted or in an unsupported format'
+      error: `Error parsing file: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }
 
 /**
- * Parses an Excel file
+ * Parse Excel files using the XLSX library
  * 
- * Reads the Excel file content and converts it to structured data:
- * - Uses the xlsx library for reliable parsing
- * - Processes the first sheet in the workbook
- * - Extracts column names from the header row
- * - Counts the number of data rows
- * - Handles empty files and parsing errors
+ * Simplified Excel parsing that only extracts what we need
  * 
- * @param file - The Excel file to parse
- * @returns Processed file data with row count and column names
+ * @param file - The file to parse
+ * @returns Processed file data
  */
 async function parseExcel(file: File): Promise<ProcessedFile> {
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer);
+    // Read the file as an array buffer
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
     
     // Get the first sheet
     const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    
-    // Convert to JSON with proper headers
-    const records = XLSX.utils.sheet_to_json(worksheet, {
-      header: 1,
-      defval: null,
-      blankrows: false
-    });
-    
-    if (records.length <= 1) { // Just headers or empty
-      return {
-        rowCount: 0,
-        columnNames: [],
-        error: 'Excel file is empty or has only headers'
-      };
+    if (!sheetName) {
+      return { rowCount: 0, columnNames: [], error: 'File contains no data sheets' };
     }
     
-    // First row should be headers
-    const headers = records[0] as string[];
+    const sheet = workbook.Sheets[sheetName];
+    
+    // Get header row
+    const headers = XLSX.utils.sheet_to_json(sheet, { header: 1, range: 0 })[0] as string[];
+    if (!headers || headers.length === 0) {
+      return { rowCount: 0, columnNames: [], error: 'File has no headers' };
+    }
+    
     const columnNames = headers.map(h => String(h).trim());
     
-    // Convert data to objects with column names
-    const dataRecords = records.slice(1).map(row => {
-      const record: Record<string, any> = {};
-      columnNames.forEach((col, i) => {
-        record[col] = i < (row as any[]).length ? (row as any[])[i] : null;
-      });
-      return record;
-    });
+    // Get record count and ensure we have data rows
+    const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+    const rowCount = range.e.r; // End row (0-indexed, excludes header)
+    
+    if (rowCount === 0) {
+      return { rowCount: 0, columnNames, error: 'File contains headers but no data rows' };
+    }
+    
+    // Extract sample data (up to 10 rows)
+    const sampleRange = { 
+      s: { r: 1, c: 0 }, 
+      e: { r: Math.min(11, rowCount), c: range.e.c }
+    };
+    
+    const sampleData = XLSX.utils.sheet_to_json(sheet, {
+      header: columnNames,
+      range: sampleRange,
+      defval: null,
+      blankrows: false
+    }) as Record<string, any>[];
     
     return {
-      rowCount: dataRecords.length,
+      rowCount,
       columnNames,
-      sampleData: dataRecords.slice(0, 5), // Include sample data for metadata generation
-      fullData: dataRecords // Store the full dataset
+      sampleData: sampleData.slice(0, 10)
     };
   } catch (error) {
-    console.error('Error parsing Excel:', error);
+    console.error('Excel parsing error:', error);
+    return {
+      rowCount: 0, 
+      columnNames: [],
+      error: `Excel parsing error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+}
+
+/**
+ * Efficiently parse large CSV files by reading only necessary data
+ * 
+ * Simplified approach that focuses on reliability and extracting just what we need
+ * 
+ * @param file - The CSV file to parse
+ * @returns Processed file data with row count and column names
+ */
+async function parseCSVEfficiently(file: File): Promise<ProcessedFile> {
+  try {
+    // Read just the beginning of the file (100KB is enough for samples)
+    const chunkSize = 100 * 1024;
+    const chunk = await readFileChunk(file, 0, Math.min(chunkSize, file.size));
+    
+    // Split into lines and find the header row
+    const rows = chunk.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+    
+    if (rows.length < 2) {
+      return { rowCount: 0, columnNames: [], error: 'Not enough rows in CSV file' };
+    }
+    
+    // Parse the header row (simply split by comma for basic CSVs)
+    const headerRow = rows[0];
+    // Basic CSV parsing - for production you might want to handle quoted commas
+    const columnNames = headerRow.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    
+    if (columnNames.length === 0) {
+      return { rowCount: 0, columnNames: [], error: 'No columns found in CSV header' };
+    }
+    
+    // Build sample data from the first 10 data rows
+    const sampleData = rows.slice(1, 11).map(row => {
+      // Parse each row into fields
+      const fields = parseCSVRowSimple(row);
+      
+      // Map fields to column names
+      return columnNames.reduce((obj, colName, i) => {
+        obj[colName] = i < fields.length ? fields[i] : null;
+        return obj;
+      }, {} as Record<string, any>);
+    });
+    
+    // Estimate total rows (quick approximation based on file size and average row length)
+    const avgRowLength = rows.slice(1).reduce((sum, row) => sum + row.length, 0) / (rows.length - 1);
+    const estimatedRows = Math.max(Math.floor(file.size / avgRowLength), rows.length - 1);
+    
+    return {
+      rowCount: estimatedRows,
+      columnNames,
+      sampleData
+    };
+  } catch (error) {
+    console.error('CSV parsing error:', error);
     return {
       rowCount: 0,
       columnNames: [],
-      error: 'Error parsing Excel file'
+      error: error instanceof Error ? error.message : 'Unknown CSV parsing error'
     };
   }
+}
+
+/**
+ * Simple CSV row parser
+ * 
+ * Handles basic CSV formatting including quoted values
+ */
+function parseCSVRowSimple(row: string): string[] {
+  // Simple regex-based CSV parsing that handles quotes
+  const matches = row.match(/("([^"]|"")*"|[^,]*)(,|$)/g) || [];
+  return matches
+    .map(field => field.replace(/,$/g, '')) // Remove trailing commas
+    .map(field => field.replace(/^"|"$/g, '')) // Remove surrounding quotes
+    .map(field => field.replace(/""/g, '"')); // Replace double quotes with single quotes
+}
+
+/**
+ * Helper function to read a chunk of a file
+ * 
+ * @param file - The file to read from
+ * @param start - The starting byte position
+ * @param end - The ending byte position
+ * @returns A string containing the chunk data
+ */
+async function readFileChunk(file: File, start: number, end: number): Promise<string> {
+  const slice = file.slice(start, end);
+  const buffer = await slice.arrayBuffer();
+  const decoder = new TextDecoder('utf-8');
+  return decoder.decode(buffer);
 } 

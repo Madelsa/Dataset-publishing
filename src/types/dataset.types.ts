@@ -14,6 +14,17 @@ export * from './metadata.types';
 export * from './api.types';
 
 /**
+ * Publication Status
+ * 
+ * Represents the current state of a dataset's publication
+ * - DRAFT: Dataset is in draft mode, not published
+ * - PENDING_REVIEW: Dataset is awaiting review
+ * - REJECTED: Dataset was rejected during review
+ * - PUBLISHED: Dataset is published and publicly accessible
+ */
+export type PublicationStatus = 'DRAFT' | 'PENDING_REVIEW' | 'REJECTED' | 'PUBLISHED';
+
+/**
  * Dataset
  * 
  * Core data structure representing a dataset in the system
@@ -30,8 +41,12 @@ export interface Dataset {
   metadataLanguage: string;
   metadataStatus: MetadataStatus;
   metadataDraft: MetadataDraft | null;
+  publicationStatus?: PublicationStatus;
+  reviewComment?: string | null;
+  version?: number;
   createdAt: Date | string;
   updatedAt: Date | string;
+  publishedAt?: Date | string;
   fileMetadata?: FileMetadata;
 }
 
@@ -46,6 +61,7 @@ export interface DatasetListItem {
   description: string | null;
   createdAt: Date | string;
   hasMetadata: boolean;
+  publicationStatus?: PublicationStatus;
 }
 
 /**
@@ -67,4 +83,14 @@ export interface DatasetCreateInput {
 export interface DatasetUpdateInput {
   name?: string;
   description?: string;
+}
+
+/**
+ * Publication Status Change Input
+ * 
+ * Input structure for updating a dataset's publication status
+ */
+export interface PublicationStatusUpdate {
+  publicationStatus: PublicationStatus;
+  reviewComment?: string;
 } 

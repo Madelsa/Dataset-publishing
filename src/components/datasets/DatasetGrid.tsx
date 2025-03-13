@@ -17,12 +17,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Dataset } from '@/types/dataset.types';
+import { Dataset, DatasetListItem } from '@/types/dataset.types';
 import DatasetCard from './DatasetCard';
 import { FiAlertCircle } from 'react-icons/fi';
 
 interface DatasetGridProps {
-  datasets: Dataset[];
+  datasets: Array<Dataset | DatasetListItem>;
   onDatasetDeleted?: (datasetId: string) => void;
 }
 

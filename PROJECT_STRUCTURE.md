@@ -13,6 +13,10 @@ Dataset-publishing/
 ├── src/                     # Application source code
 │   ├── app/                 # Next.js App Router components and routes
 │   │   ├── api/             # API route handlers
+│   │   │   └── datasets/    # Dataset-related API routes
+│   │   │       ├── upload/  # File upload endpoint
+│   │   │       └── [id]/    # Dataset-specific operations
+│   │   │           └── metadata/ # Metadata operations
 │   │   ├── (routes)/        # Page routes and layouts
 │   │   ├── context/         # React context providers
 │   │   ├── globals.css      # Global CSS styles
@@ -162,9 +166,13 @@ export interface TypeName {
 
 ## Constants and Configuration
 
-- Application constants are centralized in `/constants/index.ts`
-- Environment variables are typesafe and accessed in a consistent manner
-- Feature flags and configuration settings are organized by domain
+- Application constants are organized by domain in dedicated files:
+  - `/constants/uploads.ts` - File upload and processing constants
+  - `/constants/ai.ts` - AI service settings and prompt templates
+  - `/constants/env.ts` - Environment variable handling
+- Constants are re-exported through `/constants/index.ts` for easy imports
+- Only essential configuration (database connection, API keys) is in environment variables
+- Other configuration is managed through constants files for better type safety and defaults
 
 ## Error Handling
 

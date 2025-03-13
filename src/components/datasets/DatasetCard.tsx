@@ -18,11 +18,12 @@
 
 import { FiFile, FiClock, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import Link from 'next/link';
-import { Dataset } from '@/types/dataset.types';
+import { Dataset, DatasetListItem, MetadataStatus } from '@/types/dataset.types';
 import { formatDate, formatFileSize } from '@/utils/formatting';
+import StatusBadge from './StatusBadge';
 
 interface DatasetCardProps {
-  dataset: Dataset;
+  dataset: Dataset | DatasetListItem;
   onDelete?: (id: string) => void;
 }
 
@@ -32,9 +33,24 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
     name,
     description,
     createdAt,
-    fileMetadata,
-    hasMetadata
   } = dataset;
+  
+  // Get metadata status
+  const metadataStatus = 'metadataStatus' in dataset 
+    ? dataset.metadataStatus 
+    : 'hasMetadata' in dataset && dataset.hasMetadata
+      ? 'EDITED' // Best approximation for DatasetListItem
+      : 'PENDING';
+  
+  // Check if the dataset object has the hasMetadata property
+  const hasMetadata = 'hasMetadata' in dataset 
+    ? dataset.hasMetadata 
+    : 'metadataStatus' in dataset 
+      ? dataset.metadataStatus !== 'PENDING' 
+      : false;
+  
+  // Check if the dataset object has fileMetadata
+  const fileMetadata = 'fileMetadata' in dataset ? dataset.fileMetadata : undefined;
 
   /**
    * Handle delete button click
@@ -120,15 +136,12 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
           </div>
         </div>
         
-        <div className="mt-4">
-          {hasMetadata ? (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              Metadata Added
-            </span>
-          ) : (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-              Metadata Needed
-            </span>
+        <div className="mt-4 flex items-center justify-between">
+          <StatusBadge status={metadataStatus} />
+          
+          {/* Add publication status badge if available */}
+          {'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED' && (
+            <StatusBadge status="PUBLISHED" className="ml-2" />
           )}
         </div>
       </div>

@@ -1,12 +1,13 @@
 # Dataset Publishing Platform
 
-A web application for uploading, processing, and publishing datasets in CSV and Excel formats.
+A web application for uploading, processing, and publishing datasets in CSV and Excel formats with AI-assisted metadata generation.
 
 ## Features
 
 - File upload component supporting CSV and Excel files
 - File parsing and validation
-- Dataset metadata display
+- Dataset metadata display and editing
+- AI-powered metadata generation in multiple languages
 - PostgreSQL database integration for storing dataset information
 - Responsive UI with TailwindCSS
 
@@ -15,12 +16,14 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 - **Frontend**: Next.js, React, TailwindCSS, React Dropzone
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL with Prisma ORM
-- **File Processing**: PapaParse (CSV), XLSX.js (Excel)
+- **File Processing**: XLSX.js (Excel)
+- **AI Services**: Google Gemini AI (1.5 Flash model)
 
 ## Prerequisites
 
 - Node.js (v18 or later)
 - PostgreSQL (v14 or later)
+- Google Gemini API key (for AI metadata generation)
 
 ## Setup
 
@@ -37,47 +40,80 @@ A web application for uploading, processing, and publishing datasets in CSV and 
    npm install
    ```
 
-3. Install recommended TypeScript type definitions for better development experience:
+3. Set up PostgreSQL:
 
-   ```bash
-   npm install --save-dev @types/papaparse
-   ```
+   - **Install PostgreSQL** (if not already installed):
 
-4. Configure PostgreSQL:
+     - **macOS**: `brew install postgresql@14` or download from [postgresql.org](https://www.postgresql.org/download/macosx/)
+     - **Windows**: Download and install from [postgresql.org](https://www.postgresql.org/download/windows/)
+     - **Linux**: Use your package manager (e.g., `sudo apt install postgresql-14`)
 
-   - Create a PostgreSQL database named `dataset_publishing`
-   - Update the `.env` file with your PostgreSQL connection details:
+   - **Create a database**:
+
+     ```bash
+     # Connect to PostgreSQL
+     psql -U postgres
+
+     # Create the database
+     CREATE DATABASE dataset_publishing;
+
+     # Exit
+     \q
      ```
+
+4. Get a Gemini API key:
+
+   - Go to [Google AI Studio](https://ai.google.dev/)
+   - Sign in with your Google account
+   - Navigate to "Get API key"
+   - Create a new API key or use an existing one
+   - Copy the API key for the next step
+
+5. Configure environment variables:
+
+   - Create a `.env` file in the project root with the following content:
+
+     ```
+     # Database
      DATABASE_URL="postgresql://username:password@localhost:5432/dataset_publishing?schema=public"
+
+     # Google Gemini API
+     GEMINI_API_KEY="your_gemini_api_key"
      ```
 
-5. Run database migrations:
+   - Replace `username` and `password` with your PostgreSQL credentials
+   - Replace `your_gemini_api_key` with the API key from step 4
+   - Note: Other configuration parameters like file size limits are defined in the constants files
+
+6. Run database migrations:
 
    ```bash
    npx prisma migrate dev --name init
    ```
 
-6. Start the development server:
+7. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser
+8. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Usage
 
 1. **Upload a Dataset**
 
    - Enter a dataset name (required) and optional description
-   - Drag and drop or select a CSV or Excel file
+   - Drag and drop or select a CSV or Excel file (up to 50MB in size)
    - Click "Upload Dataset"
 
-2. **View Dataset Information**
+2. **Generate Metadata with AI**
 
-   - After successful upload, view detailed information about the dataset
-   - Toggle to see column information
-   - Upload another dataset if needed
+   - After uploading a dataset, go to the metadata editor
+   - The system automatically generates metadata using AI
+   - Toggle between English and Arabic languages
+   - Edit the generated metadata as needed
+   - Save as draft or publish
 
 3. **View Database Contents with Prisma Studio**
    - Run the following command to open Prisma Studio:
@@ -85,51 +121,25 @@ A web application for uploading, processing, and publishing datasets in CSV and 
      npx prisma studio
      ```
    - Prisma Studio will start on [http://localhost:5555](http://localhost:5555)
-   - Browse and manage your datasets and file metadata through the visual interface
 
-## Design and Styling
+## AI Metadata Generation
 
-The application uses a modern styling approach with TailwindCSS:
+The application uses Google's Gemini 1.5 Flash model to generate metadata for datasets:
 
-### Key Design Files
-
-- **`src/app/globals.css`** - Global styles and Tailwind directives
-- **`src/app/layout.tsx`** - Root layout with font imports
-- **`postcss.config.mjs`** - PostCSS configuration for Tailwind
-
-### Component-Based Styling
-
-UI components in `src/app/components/` use Tailwind utility classes:
-
-- **`FileUpload.tsx`** - Styling for the file upload interface
-- **`DatasetInfo.tsx`** - Styling for dataset information display
-
-### Modifying Styles
-
-To make design changes:
-
-1. **Component-specific styling**: Modify Tailwind classes in component files
-2. **Global styling**: Update `globals.css`
-3. **Layout changes**: Modify `layout.tsx`
-
-The project supports dark mode through media queries in `globals.css`.
-
-## Sample Data
-
-For testing purposes, the following sample data files are included:
-
-- `sample_data.csv` - A CSV file with fictional sales data (20 records)
-- `sample_data.xlsx` - An Excel file with the same fictional sales data
-
-These files can be used to test the upload and processing functionality of the platform.
+- **Model**: Gemini 1.5 Flash - An efficient, cost-effective model for text generation
+- **Capabilities**: Generates title, description, tags, and category based on dataset content
+- **Language Support**: English and Arabic metadata generation
+- **Implementation**: The AI analyzes dataset column names and sample rows to understand the data
 
 ## Project Structure
 
 - `src/app/components/` - React components
   - `FileUpload.tsx` - Component for uploading files
   - `DatasetInfo.tsx` - Component for displaying dataset information
+  - `MetadataEditor.tsx` - Component for editing AI-generated metadata
 - `src/app/api/datasets/` - API routes
   - `upload/route.ts` - API endpoint for file uploads
+  - `[id]/metadata/route.ts` - API endpoint for metadata operations
 - `src/lib/` - Utility functions
   - `prisma.ts` - Prisma client singleton
   - `aiMetadata.ts` - AI integration for metadata
@@ -147,6 +157,13 @@ These files can be used to test the upload and processing functionality of the p
 - `id` - UUID primary key
 - `name` - Dataset name
 - `description` - Optional description
+- `suggestedTitle` - AI-generated title
+- `suggestedDescription` - AI-generated description
+- `suggestedTags` - AI-generated tags
+- `suggestedCategory` - AI-generated category
+- `metadataLanguage` - Language of metadata ('en' or 'ar')
+- `metadataStatus` - Status of metadata (PENDING, GENERATED, EDITED, APPROVED)
+- `metadataDraft` - Current draft of metadata being edited
 - `fileMetadata` - One-to-one relation to FileMetadata
 - `createdAt` - Timestamp of creation
 - `updatedAt` - Timestamp of last update
@@ -160,6 +177,7 @@ These files can be used to test the upload and processing functionality of the p
 - `fileType` - MIME type of file
 - `rowCount` - Number of rows in the dataset
 - `columnNames` - Array of column names
+- `sampleData` - Sample data for AI metadata generation (limited to 10 rows)
 - `createdAt` - Timestamp of creation
 - `updatedAt` - Timestamp of last update
 
@@ -248,3 +266,10 @@ npx prisma migrate reset
 - ✅ Display of file information (rows, columns, etc.)
 - ✅ Error handling
 - ✅ Database schema for datasets
+
+## Mini-Task 2 Requirements Completion
+
+- ✅ AI-powered metadata generation for datasets
+- ✅ Support for multiple languages (English, Arabic)
+- ✅ Metadata editor with language switching
+- ✅ Metadata persistence in database
