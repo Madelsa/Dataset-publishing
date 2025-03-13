@@ -48,8 +48,6 @@ A web application for uploading, processing, and publishing datasets in CSV and 
    - **Install PostgreSQL** (if not already installed):
 
      - **macOS**: `brew install postgresql@14` or download from [postgresql.org](https://www.postgresql.org/download/macosx/)
-     - **Windows**: Download and install from [postgresql.org](https://www.postgresql.org/download/windows/)
-     - **Linux**: Use your package manager (e.g., `sudo apt install postgresql-14`)
 
    - **Create a database**:
 
