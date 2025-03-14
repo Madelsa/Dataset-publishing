@@ -326,7 +326,7 @@ export default function MetadataEditor({ datasetId }: MetadataEditorProps) {
                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center cursor-pointer"
               >
                 <FiRefreshCw className="mr-2 h-4 w-4" />
-                {state.language === 'ar' ? 'إعادة إنشاء البيانات الوصفية' : 'Regenerate Metadata'}
+                {state.language === 'ar' ? 'إنشاء البيانات الوصفية' : 'Generate Metadata'}
               </button>
               
               <button

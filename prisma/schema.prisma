@@ -17,7 +17,8 @@ model Dataset {
   suggestedCategory     String?
   metadataLanguage      String        @default("en")
   metadataDraft         Json?         // Stores draft metadata as JSON
-  metadataStatus        String        @default("PENDING") // PENDING, GENERATED, EDITED, APPROVED
+  metadataStatus        String        @default("NEEDS METADATA") // NEEDS METADATA, PENDING REVIEW, APPROVED, REJECTED
+  reviewComment         String?       // Feedback from reviewers
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
   fileMetadata          FileMetadata?

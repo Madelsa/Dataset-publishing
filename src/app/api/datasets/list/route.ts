@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
     // Add hasMetadata property to each dataset
     const enhancedDatasets = datasets.map(dataset => ({
       ...dataset,
-      hasMetadata: dataset.metadataStatus === 'GENERATED' || 
-                   dataset.metadataStatus === 'EDITED' || 
-                   dataset.metadataStatus === 'APPROVED'
+      hasMetadata: dataset.metadataStatus === 'PENDING REVIEW' || 
+                   dataset.metadataStatus === 'APPROVED' ||
+                   dataset.metadataStatus === 'REJECTED'
     }));
     
     return NextResponse.json({ datasets: enhancedDatasets });

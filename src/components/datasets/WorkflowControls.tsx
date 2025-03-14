@@ -12,11 +12,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FiSend, FiCheck, FiX, FiInfo } from 'react-icons/fi';
 import { Dataset, PublicationStatus } from '@/types/dataset.types';
 import { datasetsApi } from '@/services/api/datasets';
 import StatusBadge from './StatusBadge';
+import { getDisplayStatus } from '@/utils/dataset.utils';
 
 interface WorkflowControlsProps {
   dataset: Dataset;
@@ -34,12 +35,13 @@ export default function WorkflowControls({
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   
-  const { id, publicationStatus = 'DRAFT', reviewComment } = dataset;
+  const { id, reviewComment } = dataset;
+  const displayStatus = getDisplayStatus(dataset);
   
-  const isSubmittable = publicationStatus === 'DRAFT' && dataset.metadataStatus !== 'PENDING';
-  const isReviewable = publicationStatus === 'PENDING_REVIEW' && isReviewer;
-  const isRejected = publicationStatus === 'REJECTED';
-  const isPublished = publicationStatus === 'PUBLISHED';
+  const isSubmittable = displayStatus === 'NEEDS_METADATA';
+  const isReviewable = displayStatus === 'PENDING_REVIEW' && isReviewer;
+  const isRejected = displayStatus === 'REJECTED';
+  const isApproved = displayStatus === 'APPROVED';
   
   // Submit for review
   const handleSubmitForReview = async () => {
@@ -113,24 +115,24 @@ export default function WorkflowControls({
     <div className="bg-white shadow rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900">Publication Status</h3>
-        <StatusBadge status={publicationStatus as any} />
+        <StatusBadge status={displayStatus as any} />
       </div>
       
       {/* Workflow step description */}
       <div className="mb-6">
-        {publicationStatus === 'DRAFT' && (
+        {displayStatus === 'NEEDS_METADATA' && (
           <p className="text-sm text-gray-600">
             This dataset is in draft mode. Complete the metadata and submit for review when ready.
           </p>
         )}
         
-        {publicationStatus === 'PENDING_REVIEW' && (
+        {displayStatus === 'PENDING_REVIEW' && (
           <p className="text-sm text-gray-600">
             This dataset is awaiting review from a supervisor.
           </p>
         )}
         
-        {publicationStatus === 'REJECTED' && (
+        {displayStatus === 'REJECTED' && (
           <div className="bg-red-50 p-4 rounded-md">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -146,7 +148,7 @@ export default function WorkflowControls({
           </div>
         )}
         
-        {publicationStatus === 'PUBLISHED' && (
+        {displayStatus === 'APPROVED' && (
           <p className="text-sm text-gray-600">
             This dataset is published and publicly accessible.
           </p>

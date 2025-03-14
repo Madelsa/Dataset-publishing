@@ -100,14 +100,14 @@ export function getRelativeTimeString(date: Date | string | number): string {
  */
 export function getMetadataStatusClass(status: string): string {
   switch (status) {
-    case 'PENDING':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'GENERATED':
-      return 'bg-blue-100 text-blue-800';
-    case 'EDITED':
-      return 'bg-green-100 text-green-800';
-    case 'APPROVED':
+    case 'NEEDS METADATA':
       return 'bg-purple-100 text-purple-800';
+    case 'PENDING REVIEW':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'APPROVED':
+      return 'bg-green-100 text-green-800';
+    case 'REJECTED':
+      return 'bg-red-100 text-red-800';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -118,14 +118,14 @@ export function getMetadataStatusClass(status: string): string {
  */
 export function getMetadataStatusDescription(status: string): string {
   switch (status) {
-    case 'PENDING':
-      return 'No metadata generated yet';
-    case 'GENERATED':
-      return 'AI-generated metadata available';
-    case 'EDITED':
-      return 'Metadata has been edited';
+    case 'NEEDS METADATA':
+      return 'Needs metadata to be completed';
+    case 'PENDING REVIEW':
+      return 'Pending review by supervisor';
     case 'APPROVED':
-      return 'Metadata has been approved';
+      return 'Approved and published';
+    case 'REJECTED':
+      return 'Rejected with feedback';
     default:
       return '';
   }

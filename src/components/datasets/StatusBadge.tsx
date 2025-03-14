@@ -1,22 +1,23 @@
 /**
  * Status Badge Component
  * 
- * Displays a colored badge for dataset metadata or publication status
+ * Displays a colored badge for dataset status
  * Different colors are used to represent different statuses:
- * - Pending: Purple (displayed as "Needs Metadata")
- * - Edited: Yellow (displayed as "Pending Review")
+ * - Needs Metadata: Purple
+ * - Pending Review: Yellow
  * - Approved: Green
  * - Rejected: Red
  */
 
 import React from 'react';
-import { MetadataStatus } from '@/types/metadata.types';
+
+export type DisplayStatus = 'NEEDS_METADATA' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
 
 interface StatusBadgeProps {
   /**
    * The status to display
    */
-  status: MetadataStatus | 'REJECTED' | 'PUBLISHED';
+  status: DisplayStatus;
   
   /**
    * Optional additional CSS classes
@@ -26,22 +27,18 @@ interface StatusBadgeProps {
 
 // Map of status to color classes
 const statusColorMap = {
-  PENDING: 'bg-purple-100 text-purple-800',
-  GENERATED: 'bg-blue-100 text-blue-800', // Keeping for backward compatibility
-  EDITED: 'bg-yellow-100 text-yellow-800',
+  NEEDS_METADATA: 'bg-purple-100 text-purple-800',
+  PENDING_REVIEW: 'bg-yellow-100 text-yellow-800',
   APPROVED: 'bg-green-100 text-green-800',
-  REJECTED: 'bg-red-100 text-red-800',
-  PUBLISHED: 'bg-emerald-100 text-emerald-800', // Keeping for backward compatibility
+  REJECTED: 'bg-red-100 text-red-800'
 };
 
 // Map of status to display text
 const statusDisplayMap = {
-  PENDING: 'Needs Metadata',
-  GENERATED: 'Needs Metadata', // Fallback to similar status
-  EDITED: 'Pending Review',
+  NEEDS_METADATA: 'Needs Metadata',
+  PENDING_REVIEW: 'Pending Review',
   APPROVED: 'Approved',
-  REJECTED: 'Rejected',
-  PUBLISHED: 'Approved', // Fallback to similar status
+  REJECTED: 'Rejected'
 };
 
 export default function StatusBadge({ status, className = '' }: StatusBadgeProps) {

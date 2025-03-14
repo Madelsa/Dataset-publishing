@@ -9,12 +9,13 @@
  * Metadata Status
  * 
  * Represents the current state of a dataset's metadata
- * - PENDING: No metadata has been generated yet
- * - GENERATED: AI has generated metadata suggestions
- * - EDITED: User has edited the metadata
+ * - NEEDS METADATA: Dataset needs metadata to be generated or edited
+ * - PENDING REVIEW: Metadata has been edited and is ready for review
  * - APPROVED: Metadata has been reviewed and approved
+ * - REJECTED: Metadata has been reviewed and rejected
  */
-export type MetadataStatus = 'PENDING' | 'GENERATED' | 'EDITED' | 'APPROVED';
+export type MetadataStatus = 
+  'NEEDS METADATA' | 'PENDING REVIEW' | 'APPROVED' | 'REJECTED';
 
 /**
  * Metadata Draft

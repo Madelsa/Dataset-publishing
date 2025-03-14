@@ -7,6 +7,7 @@
 // Import types needed for Dataset interface
 import { FileMetadata } from './file.types';
 import { MetadataStatus, MetadataDraft } from './metadata.types';
+import { DisplayStatus } from '@/components/datasets/StatusBadge';
 
 // Re-export domain-specific types
 export * from './file.types';
@@ -61,7 +62,7 @@ export interface DatasetListItem {
   description: string | null;
   createdAt: Date | string;
   hasMetadata: boolean;
-  publicationStatus?: PublicationStatus;
+  displayStatus?: DisplayStatus;
 }
 
 /**
@@ -86,11 +87,11 @@ export interface DatasetUpdateInput {
 }
 
 /**
- * Publication Status Change Input
+ * Status Change Input
  * 
- * Input structure for updating a dataset's publication status
+ * Input structure for updating a dataset's status
  */
-export interface PublicationStatusUpdate {
-  publicationStatus: PublicationStatus;
+export interface StatusUpdate {
+  status: DisplayStatus;
   reviewComment?: string;
 } 

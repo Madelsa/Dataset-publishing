@@ -54,7 +54,7 @@ export async function createDataset(
     data: {
       name,
       description,
-      metadataStatus: 'PENDING' as MetadataStatus,
+      metadataStatus: 'NEEDS METADATA' as MetadataStatus,
       metadataLanguage: 'en',
       suggestedTags: [],
       fileMetadata: {
@@ -185,7 +185,7 @@ export async function datasetNameExists(name: string): Promise<boolean> {
  * Update dataset metadata with AI-generated suggestions
  * 
  * Saves AI-generated metadata suggestions to a dataset and updates its status.
- * Sets the metadata status to GENERATED.
+ * Sets the metadata status to EDITED and resets review status if needed.
  * 
  * @param id - The unique identifier of the dataset
  * @param metadata - The AI-generated metadata suggestions
@@ -205,7 +205,7 @@ export async function updateDatasetMetadata(
       suggestedTags: metadata.tags,
       suggestedCategory: metadata.category,
       metadataLanguage: language,
-      metadataStatus: 'GENERATED' as MetadataStatus
+      metadataStatus: 'NEEDS METADATA' as MetadataStatus
     }
   });
   
@@ -216,7 +216,7 @@ export async function updateDatasetMetadata(
  * Save metadata draft
  * 
  * Saves user-edited metadata draft to a dataset and updates its status.
- * Sets the metadata status to EDITED and resets publication status if needed.
+ * Sets the metadata status to PENDING REVIEW and resets review status if needed.
  * 
  * @param id - The unique identifier of the dataset
  * @param draft - The user-edited metadata draft
@@ -239,15 +239,13 @@ export async function saveMetadataDraft(
   const updateData: any = {
     metadataDraft: draft as any,
     metadataLanguage: language,
-    metadataStatus: 'EDITED' as MetadataStatus
+    metadataStatus: 'PENDING REVIEW' as MetadataStatus
   };
   
-  // Reset publication status if the dataset was previously
-  // rejected or published (approved)
-  if (currentDataset.publicationStatus === 'REJECTED' || 
-      currentDataset.publicationStatus === 'PUBLISHED') {
-    updateData.publicationStatus = 'DRAFT';
-    // Clear any previous review comments when status changes
+  // Reset review status if the dataset was previously
+  // rejected or approved
+  if (currentDataset.metadataStatus === 'APPROVED') {
+    // Reset to PENDING REVIEW and clear any previous review comments when status changes
     updateData.reviewComment = null;
   }
   
@@ -281,38 +279,44 @@ export async function deleteDataset(id: string): Promise<Dataset> {
 }
 
 /**
- * Update dataset publication status
+ * Update dataset status
  * 
- * Updates a dataset's publication status, metadata status, and related fields
- * Used for the publication workflow (submit for review, approve, reject)
+ * Updates a dataset's metadata status and related fields
+ * Used for the review workflow (needs metadata, pending review, approve, reject)
  * 
  * @param id - The unique identifier of the dataset
- * @param publicationStatus - The new publication status
+ * @param status - The requested display status (NEEDS_METADATA, PENDING_REVIEW, APPROVED, REJECTED)
  * @param reviewComment - Optional reviewer comment
  * @returns The updated dataset
  */
-export async function updateDatasetPublicationStatus(
+export async function updateDatasetStatus(
   id: string,
-  publicationStatus: string,
+  status: string,
   reviewComment?: string
 ): Promise<Dataset> {
   interface DatasetUpdateFields {
-    publicationStatus: string;
-    metadataStatus?: string;
-    publishedAt?: Date;
+    metadataStatus: string;
     reviewComment?: string | null;
   }
   
   const updateData: DatasetUpdateFields = {
-    publicationStatus,
+    metadataStatus: 'NEEDS METADATA', // Default value
   };
   
-  // Update metadata status based on publication status
-  if (publicationStatus === 'PUBLISHED') {
-    updateData.metadataStatus = 'APPROVED';
-    updateData.publishedAt = new Date();
-  } else if (publicationStatus === 'REJECTED') {
-    updateData.metadataStatus = 'EDITED';
+  // Map display status to metadata status
+  switch (status) {
+    case 'NEEDS_METADATA':
+      updateData.metadataStatus = 'NEEDS METADATA';
+      break;
+    case 'PENDING_REVIEW':
+      updateData.metadataStatus = 'PENDING REVIEW';
+      break;
+    case 'APPROVED':
+      updateData.metadataStatus = 'APPROVED';
+      break;
+    case 'REJECTED':
+      updateData.metadataStatus = 'REJECTED';
+      break;
   }
   
   // Add reviewer comment if provided

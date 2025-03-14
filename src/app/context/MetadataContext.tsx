@@ -32,7 +32,7 @@ interface MetadataState {
     tags: string[];
     category: string;
   } | null;
-  status: 'PENDING' | 'GENERATED' | 'EDITED' | 'APPROVED';
+  status: 'NEEDS METADATA' | 'PENDING REVIEW' | 'APPROVED' | 'REJECTED';
 }
 
 // Define actions that can be performed on metadata
@@ -58,7 +58,7 @@ const initialState: MetadataState = {
     category: ''
   },
   draft: null,
-  status: 'PENDING'
+  status: 'NEEDS METADATA'
 };
 
 /**
@@ -152,7 +152,7 @@ export function MetadataProvider({ children }: MetadataProviderProps) {
       
       // Update state with generated metadata
       dispatch({ type: 'SET_SUGGESTED', payload: data.metadata });
-      dispatch({ type: 'SET_STATUS', payload: 'GENERATED' });
+      dispatch({ type: 'SET_STATUS', payload: 'NEEDS METADATA' });
       
       // Always update the draft with the new metadata when language changes
       // This ensures draft content is updated with the correct language
@@ -199,7 +199,7 @@ export function MetadataProvider({ children }: MetadataProviderProps) {
         throw new Error(error.message || 'Failed to save metadata draft');
       }
       
-      dispatch({ type: 'SET_STATUS', payload: 'EDITED' });
+      dispatch({ type: 'SET_STATUS', payload: 'PENDING REVIEW' });
       
     } catch (error) {
       dispatch({ 

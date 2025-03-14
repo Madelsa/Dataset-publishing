@@ -110,7 +110,7 @@ export default function DatasetReviewPage() {
   }
   
   // Check if dataset is in the correct state for review
-  const isReviewable = dataset.metadataStatus === 'EDITED';
+  const isReviewable = dataset.metadataStatus === 'PENDING REVIEW';
   
   return (
     <PageLayout>

@@ -40,7 +40,7 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
   const displayStatus = getDisplayStatus(dataset);
 
   // Check if dataset has "Pending Review" status
-  const isPendingReview = displayStatus === 'EDITED';
+  const isPendingReview = displayStatus === 'PENDING_REVIEW';
   
   // Check if the dataset object has the hasMetadata property
   const hasMetadata = 'hasMetadata' in dataset 

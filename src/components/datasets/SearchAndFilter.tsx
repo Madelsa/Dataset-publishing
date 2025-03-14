@@ -34,8 +34,8 @@ export default function SearchAndFilter({ onChange }: SearchAndFilterProps) {
   // Define metadata status options
   const metadataStatusOptions = [
     { value: 'ALL', label: 'All Statuses' },
-    { value: 'PENDING', label: 'Needs Metadata' },
-    { value: 'EDITED', label: 'Pending Review' },
+    { value: 'NEEDS METADATA', label: 'Needs Metadata' },
+    { value: 'PENDING REVIEW', label: 'Pending Review' },
     { value: 'APPROVED', label: 'Approved' },
     { value: 'REJECTED', label: 'Rejected' },
   ];

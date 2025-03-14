@@ -25,9 +25,9 @@ export async function GET(
     // Add hasMetadata property based on metadata status
     const enhancedDataset = {
       ...dataset,
-      hasMetadata: dataset.metadataStatus === 'GENERATED' || 
-                   dataset.metadataStatus === 'EDITED' || 
-                   dataset.metadataStatus === 'APPROVED'
+      hasMetadata: (dataset.metadataStatus as string) === 'PENDING REVIEW' || 
+                   (dataset.metadataStatus as string) === 'APPROVED' ||
+                   (dataset.metadataStatus as string) === 'REJECTED'
     };
 
     return NextResponse.json({ dataset: enhancedDataset });

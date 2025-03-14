@@ -57,8 +57,8 @@ export function useFilteredDatasets() {
         
         // For DatasetListItem, we only have hasMetadata, so do our best approximation
         if ('hasMetadata' in dataset) {
-          // If filtering for PENDING, show items without metadata
-          if (filterOptions.metadataStatus === 'PENDING') {
+          // If filtering for NEEDS METADATA, show items without metadata
+          if (filterOptions.metadataStatus === 'NEEDS METADATA') {
             return !dataset.hasMetadata;
           }
           // For other statuses, show items with metadata (not perfect but best approximation)

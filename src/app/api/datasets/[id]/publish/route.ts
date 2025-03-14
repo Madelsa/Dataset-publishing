@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server';
-import { getDatasetById, updateDatasetPublicationStatus } from '@/services/datasetService';
-import { PublicationStatus } from '@/types/dataset.types';
+import { getDatasetById, updateDatasetStatus } from '@/services/datasetService';
+import { DisplayStatus } from '@/components/datasets/StatusBadge';
 import { enhanceDataset } from '@/utils/dataset.utils';
 import { createErrorResponse, createSuccessResponse } from '@/utils/api.utils';
 
 /**
  * API Route: PUT /api/datasets/[id]/publish
  * 
- * Purpose: Update a dataset's publication status (draft, pending review, rejected, published)
- * Handles the publication workflow for datasets
+ * Purpose: Update a dataset's status (needs metadata, pending review, rejected, approved)
+ * Handles the dataset workflow
  * 
  * @param params.id - The unique identifier of the dataset
  */
@@ -26,19 +26,19 @@ export async function PUT(
       return createErrorResponse('NOT_FOUND', 'Dataset not found');
     }
     
-    // Parse the request body to get publication status update
+    // Parse the request body to get status update
     const body = await request.json();
-    const { publicationStatus, reviewComment } = body;
+    const { status, reviewComment } = body;
     
-    // Validate the publication status
-    if (!publicationStatus || !['DRAFT', 'PENDING_REVIEW', 'REJECTED', 'PUBLISHED'].includes(publicationStatus)) {
-      return createErrorResponse('BAD_REQUEST', 'Invalid publication status');
+    // Validate the status
+    if (!status || !['NEEDS_METADATA', 'PENDING_REVIEW', 'APPROVED', 'REJECTED'].includes(status)) {
+      return createErrorResponse('BAD_REQUEST', 'Invalid status');
     }
     
-    // Update the dataset publication status in the database using our service function
-    const updatedDataset = await updateDatasetPublicationStatus(
+    // Update the dataset status in the database using our service function
+    const updatedDataset = await updateDatasetStatus(
       id, 
-      publicationStatus as PublicationStatus,
+      status as DisplayStatus,
       reviewComment
     );
     
@@ -47,10 +47,10 @@ export async function PUT(
     
     return createSuccessResponse({ dataset: enhancedDataset });
   } catch (error) {
-    console.error('Error updating publication status:', error);
+    console.error('Error updating dataset status:', error);
     return createErrorResponse(
       'INTERNAL_SERVER_ERROR',
-      'Error updating publication status'
+      'Error updating dataset status'
     );
   }
 } 

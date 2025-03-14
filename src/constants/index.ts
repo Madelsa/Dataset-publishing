@@ -49,10 +49,10 @@ export const REDIRECT_DELAY = 1500; // ms
 export const METADATA = {
   // Metadata status values
   STATUS: {
-    PENDING: 'PENDING',
-    GENERATED: 'GENERATED',
-    EDITED: 'EDITED',
-    APPROVED: 'APPROVED'
+    NEEDS_METADATA: 'NEEDS METADATA',
+    PENDING_REVIEW: 'PENDING REVIEW',
+    APPROVED: 'APPROVED',
+    REJECTED: 'REJECTED'
   },
   
   // Supported languages

@@ -1,5 +1,6 @@
 import { Dataset, DatasetListItem } from '@/types/dataset.types';
 import { MetadataStatus } from '@/types/metadata.types';
+import { DisplayStatus } from '@/components/datasets/StatusBadge';
 
 /**
  * Determines if a dataset has metadata based on its metadata status
@@ -10,7 +11,9 @@ import { MetadataStatus } from '@/types/metadata.types';
 export function hasMetadata(dataset: Dataset | DatasetListItem): boolean {
   // For Dataset objects
   if ('metadataStatus' in dataset) {
-    return dataset.metadataStatus !== 'PENDING';
+    return dataset.metadataStatus === 'PENDING REVIEW' || 
+           dataset.metadataStatus === 'APPROVED' ||
+           dataset.metadataStatus === 'REJECTED';
   }
   
   // For DatasetListItem objects
@@ -22,34 +25,35 @@ export function hasMetadata(dataset: Dataset | DatasetListItem): boolean {
 }
 
 /**
- * Determines the display status for a dataset, considering both
- * publication status and metadata status
+ * Determines the display status for a dataset
  * 
  * @param dataset - The dataset to check
- * @returns The status to display (REJECTED, APPROVED, EDITED, PENDING)
+ * @returns The standardized display status (NEEDS_METADATA, PENDING_REVIEW, APPROVED, REJECTED)
  */
-export function getDisplayStatus(dataset: Dataset | DatasetListItem): string {
-  // Check publication status first (for rejected and approved)
-  const isRejected = 'publicationStatus' in dataset && dataset.publicationStatus === 'REJECTED';
-  const isPublished = 'publicationStatus' in dataset && dataset.publicationStatus === 'PUBLISHED';
-  
-  // Prioritize publication status over metadata status
-  let displayStatus = isRejected 
-    ? 'REJECTED' 
-    : isPublished 
-      ? 'APPROVED' 
-      : 'metadataStatus' in dataset 
-        ? dataset.metadataStatus 
-        : 'hasMetadata' in dataset && dataset.hasMetadata
-          ? 'EDITED' // Show as "Pending Review" for DatasetListItem with metadata
-          : 'PENDING'; // Show as "Needs Metadata"
-  
-  // Simplify GENERATED to match our simplified statuses
-  if (displayStatus === 'GENERATED') {
-    displayStatus = 'PENDING'; // Show as "Needs Metadata"
+export function getDisplayStatus(dataset: Dataset | DatasetListItem): DisplayStatus {
+  // Check metadata status directly
+  if ('metadataStatus' in dataset) {
+    // Direct mapping from database values to display status
+    switch (dataset.metadataStatus as MetadataStatus) {
+      case 'NEEDS METADATA':
+        return 'NEEDS_METADATA';
+      case 'PENDING REVIEW':
+        return 'PENDING_REVIEW';
+      case 'APPROVED':
+        return 'APPROVED';
+      case 'REJECTED':
+        return 'REJECTED';
+      default:
+        return 'NEEDS_METADATA'; // Default fallback
+    }
   }
   
-  return displayStatus;
+  // For DatasetListItem objects
+  if ('hasMetadata' in dataset) {
+    return dataset.hasMetadata ? 'PENDING_REVIEW' : 'NEEDS_METADATA';
+  }
+  
+  return 'NEEDS_METADATA'; // Default fallback
 }
 
 /**
@@ -58,7 +62,7 @@ export function getDisplayStatus(dataset: Dataset | DatasetListItem): string {
  * @param dataset - The dataset to enhance
  * @returns The enhanced dataset with computed properties
  */
-export function enhanceDataset<T extends Dataset | DatasetListItem>(dataset: T): T & { hasMetadata: boolean, displayStatus: string } {
+export function enhanceDataset<T extends Dataset | DatasetListItem>(dataset: T): T & { hasMetadata: boolean, displayStatus: DisplayStatus } {
   return {
     ...dataset,
     hasMetadata: hasMetadata(dataset),
@@ -72,6 +76,6 @@ export function enhanceDataset<T extends Dataset | DatasetListItem>(dataset: T):
  * @param datasets - The datasets to enhance
  * @returns The enhanced datasets with computed properties
  */
-export function enhanceDatasets<T extends Dataset | DatasetListItem>(datasets: T[]): (T & { hasMetadata: boolean, displayStatus: string })[] {
+export function enhanceDatasets<T extends Dataset | DatasetListItem>(datasets: T[]): (T & { hasMetadata: boolean, displayStatus: DisplayStatus })[] {
   return datasets.map(dataset => enhanceDataset(dataset));
 } 

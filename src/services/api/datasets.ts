@@ -6,7 +6,8 @@
  * and abstracts the HTTP request details from components
  */
 
-import { Dataset, DatasetListItem, DatasetCreateInput, DatasetUpdateInput, PublicationStatusUpdate } from '@/types/dataset.types';
+import { Dataset, DatasetListItem, DatasetCreateInput, DatasetUpdateInput, StatusUpdate } from '@/types/dataset.types';
+import { DisplayStatus } from '@/components/datasets/StatusBadge';
 
 /**
  * Datasets API service
@@ -168,8 +169,8 @@ export const datasetsApi = {
    * @returns Promise resolving to the updated dataset
    */
   submitForReview: async (id: string): Promise<Dataset> => {
-    const update: PublicationStatusUpdate = {
-      publicationStatus: 'PENDING_REVIEW'
+    const update: StatusUpdate = {
+      status: 'PENDING_REVIEW'
     };
     
     const response = await fetch(`/api/datasets/${id}/publish`, {
@@ -189,15 +190,15 @@ export const datasetsApi = {
   },
   
   /**
-   * Approve and publish a dataset
+   * Approve a dataset
    * 
    * @param id - Dataset ID
    * @param comment - Optional feedback or comment for the approval
-   * @returns Promise resolving to the published dataset
+   * @returns Promise resolving to the approved dataset
    */
   publishDataset: async (id: string, comment?: string): Promise<Dataset> => {
-    const update: PublicationStatusUpdate = {
-      publicationStatus: 'PUBLISHED',
+    const update: StatusUpdate = {
+      status: 'APPROVED',
       reviewComment: comment
     };
     
@@ -210,7 +211,7 @@ export const datasetsApi = {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to publish dataset');
+      throw new Error('Failed to approve dataset');
     }
     
     const data = await response.json();
@@ -225,8 +226,8 @@ export const datasetsApi = {
    * @returns Promise resolving to the rejected dataset
    */
   rejectDataset: async (id: string, comment: string): Promise<Dataset> => {
-    const update: PublicationStatusUpdate = {
-      publicationStatus: 'REJECTED',
+    const update: StatusUpdate = {
+      status: 'REJECTED',
       reviewComment: comment
     };
     
