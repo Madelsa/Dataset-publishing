@@ -2,6 +2,12 @@
 
 A web application for uploading, processing, and publishing datasets in CSV and Excel formats with AI-assisted metadata generation.
 
+## Demo
+
+Watch a demonstration of the Dataset Publishing Platform in action:
+
+[![Dataset Publishing Platform Demo](https://i.vimeocdn.com/video/1065783547-thumbnail)](https://vimeo.com/1065783547/c2abdbe434)
+
 ## Features
 
 - File upload component supporting CSV and Excel files
