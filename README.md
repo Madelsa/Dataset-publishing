@@ -6,7 +6,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 
 Watch a demonstration of the Dataset Publishing Platform in action:
 
-[![Dataset Publishing Platform Demo](Thumbnail.png)](https://vimeo.com/1065783547/c2abdbe434){:target="_blank"}
+[![Dataset Publishing Platform Demo](Thumbnail.png)](https://vimeo.com/1065783547/c2abdbe434)
 
 ## Features
 
