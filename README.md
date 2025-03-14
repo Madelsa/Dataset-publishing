@@ -7,7 +7,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 - File upload component supporting CSV and Excel files
 - File parsing and validation
 - Dataset metadata display and editing
-- AI-powered metadata generation in multiple languages
+- AI-powered metadata generation in multiple languages (English and Arabic)
 - PostgreSQL database integration for storing dataset information
 - Responsive UI with TailwindCSS
 - Standardized status values (Needs Metadata, Pending Review, Approved, Rejected)
@@ -29,160 +29,120 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 - PostgreSQL (v14 or later)
 - Google Gemini API key (for AI metadata generation)
 
-## Setup
+## Setup Guide
 
-1. Clone the repository:
+### 1. Clone the Repository
 
-   ```bash
-   git clone https://github.com/Madelsa/Dataset-publishing.git
-   cd Dataset-publishing
-   ```
+```bash
+git clone https://github.com/Madelsa/Dataset-publishing.git
+cd Dataset-publishing
+```
 
-2. Install dependencies:
+### 2. Install Dependencies
 
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. Set up PostgreSQL:
+### 3. PostgreSQL Setup
 
-   - **Install PostgreSQL** (if not already installed):
+#### Installation (if not already installed)
 
-     - **macOS**: `brew install postgresql@14` or download from [postgresql.org](https://www.postgresql.org/download/macosx/)
+- **macOS**: `brew install postgresql@14` or download from [postgresql.org](https://www.postgresql.org/download/macosx/)
 
-   - **Start PostgreSQL Service**:
+#### Start PostgreSQL Service
 
-     ```bash
-     # Start PostgreSQL service with Homebrew
-     brew services start postgresql@14
+```bash
+# Start PostgreSQL service with Homebrew
+brew services start postgresql@14
 
-     # Check service status
-     brew services list | grep postgres
-     ```
+# Check service status
+brew services list | grep postgres
+```
 
-   - **Create a database**:
+#### Create a Database
 
-     ```bash
-     # Create the database
-     createdb dataset_publishing_platform
-     ```
+```bash
+# Create the database
+createdb dataset_publishing
+```
 
-   - **Database Connection Issues**:
+### 4. Configure Environment Variables
 
-     If you encounter permission issues like `User 'postgres' was denied access`, update your `.env` file to use your system username:
+Create a `.env` file in the project root with the following content:
 
-     ```
-     # Replace 'postgres' with your system username
-     DATABASE_URL="postgresql://yourusername:postgres@localhost:5432/dataset_publishing_platform?schema=public"
-     ```
+```
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/dataset_publishing?schema=public"
 
-     You can get your system username with:
+# Google Gemini API
+GEMINI_API_KEY="your_gemini_api_key"
+```
 
-     ```bash
-     whoami
-     ```
-   - **Migrate Database
-     Generates and applies migration files to your development database
-     
-     ``bash
-     npx prisma migrate dev --name init
-     ```
-     
-   - **View Database Contents**:
+Notes:
 
-     You can view your database in several ways:
+- Replace `username` and `password` with your PostgreSQL credentials
+- For the `username`, you can use your system username (find it with `whoami` command)
+- If you encounter permission issues, ensure you're using the correct username in the connection string
 
-     1. Using psql (command line):
+### 5. Get a Gemini API Key
 
-     ```bash
-     # List all tables
-     psql -d dataset_publishing_platform -c "\dt"
+- Go to [Google AI Studio](https://ai.google.dev/)
+- Sign in with your Google account
+- Navigate to "Get API key"
+- Create a new API key or use an existing one
+- Add the API key to your `.env` file
 
-     # Describe a specific table (note: use quotes for case sensitivity)
-     psql -d dataset_publishing_platform -c "\d \"Dataset\""
-     ```
+### 6. Set Up the Database
 
-     2. Using Prisma Studio (GUI):
+Run database migrations to set up your database schema:
 
-     ```bash
-     npx prisma studio
-     ```
+```bash
+npx prisma migrate dev --name init
+```
 
-     Then visit http://localhost:5555 in your browser
+### 7. Start the Development Server
 
-     3. Using a PostgreSQL GUI client:
+```bash
+npm run dev
+```
 
-     - pgAdmin: https://www.pgadmin.org/download/
-     - Postico (macOS): https://eggerapps.at/postico/
-     - TablePlus: https://tableplus.com/
+### 8. Open the Application
 
-4. Get a Gemini API key:
-
-   - Go to [Google AI Studio](https://ai.google.dev/)
-   - Sign in with your Google account
-   - Navigate to "Get API key"
-   - Create a new API key or use an existing one
-   - Copy the API key for the next step
-
-5. Configure environment variables:
-
-   - Create a `.env` file in the project root with the following content:
-
-     ```
-     # Database
-     DATABASE_URL="postgresql://username:password@localhost:5432/dataset_publishing?schema=public"
-
-     # Google Gemini API
-     GEMINI_API_KEY="your_gemini_api_key"
-     ```
-
-   - Replace `username` and `password` with your PostgreSQL credentials
-   - Replace `your_gemini_api_key` with the API key from step 4
-   - Note: Other configuration parameters like file size limits are defined in the constants files
-
-6. Run database migrations:
-
-   ```bash
-   npx prisma migrate dev --name init
-   ```
-
-7. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-8. Open [http://localhost:3000](http://localhost:3000) in your browser
+Visit [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Usage
 
-1. **Upload a Dataset**
+### 1. Upload a Dataset
 
-   - Enter a dataset name (required) and optional description
-   - Drag and drop or select a CSV or Excel file (up to 50MB in size)
-   - Click "Upload Dataset"
+- Enter a dataset name (required) and optional description
+- Drag and drop or select a CSV or Excel file (up to 50MB in size)
+- Click "Upload Dataset"
 
-2. **Generate Metadata with AI**
+### 2. Generate Metadata with AI
 
-   - After uploading a dataset, go to the metadata editor
-   - The system automatically generates metadata using AI
-   - Toggle between English and Arabic languages
-   - Edit the generated metadata as needed
-   - Save as draft or submit for review
+- After uploading a dataset, go to the metadata editor
+- The system automatically generates metadata using AI
+- Toggle between English and Arabic languages
+- Edit the generated metadata as needed
+- Save as draft or submit for review
 
-3. **Review Workflow**
+### 3. Review Workflow
 
-   - Datasets with completed metadata can be submitted for review (status: "Pending Review")
-   - Reviewers can approve or reject datasets
-   - Feedback can be provided during approval or rejection
-   - Status badges indicate the current state of each dataset
+- Datasets with completed metadata can be submitted for review (status: "Pending Review")
+- Reviewers can approve or reject datasets
+- Feedback can be provided during approval or rejection
+- Status badges indicate the current state of each dataset
 
-4. **View Database Contents with Prisma Studio**
-   - Run the following command to open Prisma Studio:
-     ```bash
-     npx prisma studio
-     ```
-   - Prisma Studio will start on [http://localhost:5555](http://localhost:5555)
+### 4. View Database Contents
+
+Use Prisma Studio to view and manage database records:
+
+```bash
+npx prisma studio
+```
+
+This will open Prisma Studio at [http://localhost:5555](http://localhost:5555)
 
 ## AI Metadata Generation
 
@@ -251,121 +211,70 @@ The application uses Google's Gemini 1.5 Flash model to generate metadata for da
 - `createdAt` - Timestamp of creation
 - `updatedAt` - Timestamp of last update
 
-## Database Management
+## Database Management Reference
 
-### Creating a New Migration
-
-When you make changes to your Prisma schema, create a new migration:
+### Common Prisma Commands
 
 ```bash
+# Create/update migrations
 npx prisma migrate dev --name <migration-name>
-```
 
-### Applying Migrations to Production
-
-To apply migrations to a production database:
-
-```bash
+# Apply migrations to production
 npx prisma migrate deploy
+
+# Reset database (⚠️ CAUTION: deletes all data)
+npx prisma migrate reset
+
+# Generate Prisma client after schema changes
+npx prisma generate
+
+# Open Prisma Studio
+npx prisma studio
 ```
 
-### PostgreSQL Management Commands
-
-#### Starting and Stopping PostgreSQL
+### PostgreSQL Commands Reference
 
 ```bash
-# Start PostgreSQL service
+# Start/stop PostgreSQL service
 brew services start postgresql@14
-
-# Stop PostgreSQL service
 brew services stop postgresql@14
 
-# Check PostgreSQL service status
-brew services list | grep postgres
-```
-
-#### Viewing Database Information
-
-```bash
 # List all PostgreSQL databases
 psql -l | cat
 
 # Connect to a specific database
-psql -d database_name
+psql -d dataset_publishing
 
-# List all tables in a database
-psql -d database_name -c "\dt"
+# List all tables in connected database
+psql -d dataset_publishing -c "\dt"
 
-# Describe a specific table (note: use quotes for case sensitivity)
-psql -d database_name -c "\d \"TableName\""
-```
+# Describe a specific table
+psql -d dataset_publishing -c "\d \"Dataset\""
 
-#### Managing Databases
-
-```bash
-# Create a new database
+# Create/drop a database
 createdb database_name
-
-# Drop (delete) a database
 dropdb database_name
 ```
 
-### Resetting the Database
+## Troubleshooting
 
-To completely reset your database (⚠️ CAUTION: this will delete all data):
+### Database Connection Issues
 
-```bash
-npx prisma migrate reset
-```
+If you encounter connection issues:
 
-Or with force flag to skip confirmation:
+1. Ensure PostgreSQL is running (`brew services list | grep postgres`)
+2. Check your username in the DATABASE_URL (should match your system username)
+3. Verify the database exists (`psql -l | cat`)
+4. Make sure port 5432 is not blocked by another service
 
-```bash
-npx prisma migrate reset --force
-```
+### File Upload Problems
 
-### Generating Prisma Client
-
-After schema changes, regenerate the Prisma client:
-
-```bash
-npx prisma generate
-```
-
-## Development
-
-To make changes to the database schema, modify the `prisma/schema.prisma` file and run:
-
-```bash
-npx prisma migrate dev --name <migration-name>
-```
-
-To reset your development database (caution: this will delete all data):
-
-```bash
-npx prisma migrate reset
-```
+- Maximum file size is 50MB
+- Supported formats are CSV and Excel (.xlsx, .xls)
+- Check browser console for detailed error messages
 
 ## Requirements Completion
 
-### Mini-Task 1: File Upload and Processing
-
-- ✅ File upload component for CSV and Excel files
-- ✅ Service for parsing and validating files
-- ✅ Display of file information (rows, columns, etc.)
-- ✅ Error handling
-- ✅ Database schema for datasets
-
-### Mini-Task 2: AI Metadata Generation
-
-- ✅ AI-powered metadata generation for datasets
-- ✅ Support for multiple languages (English, Arabic)
-- ✅ Metadata editor with language switching
-- ✅ Metadata persistence in database
-
-### Mini-Task 3: Review Workflow
-
-- ✅ Standardized status values (Needs Metadata, Pending Review, Approved, Rejected)
-- ✅ Review interface for datasets with "Pending Review" status
-- ✅ Approval and rejection functionality with feedback
-- ✅ Status tracking across the workflow
+- ✅ File upload and processing
+- ✅ AI metadata generation (English, Arabic)
+- ✅ Review workflow with standardized status values
