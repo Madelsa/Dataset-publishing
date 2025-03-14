@@ -83,6 +83,7 @@ Notes:
 
 - Replace `username` and `password` with your PostgreSQL credentials
 - For the `username`, you can use your system username (find it with `whoami` command)
+- The default `password` is usually `postgres`
 - If you encounter permission issues, ensure you're using the correct username in the connection string
 
 ### 5. Get a Gemini API Key
