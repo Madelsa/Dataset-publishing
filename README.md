@@ -81,7 +81,13 @@ A web application for uploading, processing, and publishing datasets in CSV and 
      ```bash
      whoami
      ```
-
+   - **Migrate Database
+     Generates and applies migration files to your development database
+     
+     ``bash
+     npx prisma migrate dev --name init
+     ```
+     
    - **View Database Contents**:
 
      You can view your database in several ways:
