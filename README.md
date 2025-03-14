@@ -263,6 +263,47 @@ To apply migrations to a production database:
 npx prisma migrate deploy
 ```
 
+### PostgreSQL Management Commands
+
+#### Starting and Stopping PostgreSQL
+
+```bash
+# Start PostgreSQL service
+brew services start postgresql@14
+
+# Stop PostgreSQL service
+brew services stop postgresql@14
+
+# Check PostgreSQL service status
+brew services list | grep postgres
+```
+
+#### Viewing Database Information
+
+```bash
+# List all PostgreSQL databases
+psql -l | cat
+
+# Connect to a specific database
+psql -d database_name
+
+# List all tables in a database
+psql -d database_name -c "\dt"
+
+# Describe a specific table (note: use quotes for case sensitivity)
+psql -d database_name -c "\d \"TableName\""
+```
+
+#### Managing Databases
+
+```bash
+# Create a new database
+createdb database_name
+
+# Drop (delete) a database
+dropdb database_name
+```
+
 ### Resetting the Database
 
 To completely reset your database (⚠️ CAUTION: this will delete all data):
