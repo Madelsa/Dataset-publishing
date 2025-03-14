@@ -102,13 +102,23 @@ Run database migrations to set up your database schema:
 npx prisma migrate dev --name init
 ```
 
-### 7. Start the Development Server
+### 7. View Database Contents
+
+Use Prisma Studio to view and manage database records:
+
+```bash
+npx prisma studio
+```
+
+This will open Prisma Studio at [http://localhost:5555](http://localhost:5555)
+
+### 8. Start the Development Server
 
 ```bash
 npm run dev
 ```
 
-### 8. Open the Application
+### 9. Open the Application
 
 Visit [http://localhost:3000](http://localhost:3000) in your browser
 
@@ -134,16 +144,6 @@ Visit [http://localhost:3000](http://localhost:3000) in your browser
 - Reviewers can approve or reject datasets
 - Feedback can be provided during approval or rejection
 - Status badges indicate the current state of each dataset
-
-### 4. View Database Contents
-
-Use Prisma Studio to view and manage database records:
-
-```bash
-npx prisma studio
-```
-
-This will open Prisma Studio at [http://localhost:5555](http://localhost:5555)
 
 ## AI Metadata Generation
 
