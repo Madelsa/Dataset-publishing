@@ -6,6 +6,19 @@
  */
 
 /**
+ * Metadata Status Constants
+ * 
+ * Centralized constants for metadata status values
+ * Using constants here prevents typos and enables easier refactoring
+ */
+export const METADATA_STATUS = {
+  NEEDS_METADATA: 'NEEDS METADATA',
+  PENDING_REVIEW: 'PENDING REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const;
+
+/**
  * Metadata Status
  * 
  * Represents the current state of a dataset's metadata
@@ -14,8 +27,7 @@
  * - APPROVED: Metadata has been reviewed and approved
  * - REJECTED: Metadata has been reviewed and rejected
  */
-export type MetadataStatus = 
-  'NEEDS METADATA' | 'PENDING REVIEW' | 'APPROVED' | 'REJECTED';
+export type MetadataStatus = typeof METADATA_STATUS[keyof typeof METADATA_STATUS];
 
 /**
  * Metadata Draft

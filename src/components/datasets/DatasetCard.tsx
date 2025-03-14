@@ -18,7 +18,8 @@
 
 import { FiFile, FiClock, FiEdit2, FiTrash2, FiCheckSquare } from 'react-icons/fi';
 import Link from 'next/link';
-import { Dataset, DatasetListItem, MetadataStatus } from '@/types/dataset.types';
+import { Dataset, DatasetListItem } from '@/types/dataset.types';
+import { MetadataStatus, METADATA_STATUS } from '@/types/metadata.types';
 import { formatDate, formatFileSize } from '@/utils/formatting';
 import { getDisplayStatus } from '@/utils/dataset.utils';
 import StatusBadge from './StatusBadge';
@@ -46,7 +47,7 @@ export default function DatasetCard({ dataset, onDelete }: DatasetCardProps) {
   const hasMetadata = 'hasMetadata' in dataset 
     ? dataset.hasMetadata 
     : 'metadataStatus' in dataset 
-      ? dataset.metadataStatus !== 'PENDING' 
+      ? dataset.metadataStatus !== METADATA_STATUS.NEEDS_METADATA 
       : false;
   
   // Check if the dataset object has fileMetadata

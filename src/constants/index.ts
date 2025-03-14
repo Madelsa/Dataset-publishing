@@ -4,6 +4,8 @@
  * Re-exports all constants from specialized files for easier imports
  */
 
+import { METADATA_STATUS } from '@/types/metadata.types';
+
 // Re-export constants by domain
 export * from './env';
 export * from './ai';
@@ -47,13 +49,8 @@ export const REDIRECT_DELAY = 1500; // ms
  * Metadata-related constants
  */
 export const METADATA = {
-  // Metadata status values
-  STATUS: {
-    NEEDS_METADATA: 'NEEDS METADATA',
-    PENDING_REVIEW: 'PENDING REVIEW',
-    APPROVED: 'APPROVED',
-    REJECTED: 'REJECTED'
-  },
+  // Metadata status values (imported from types for consistency)
+  STATUS: METADATA_STATUS,
   
   // Supported languages
   LANGUAGES: {

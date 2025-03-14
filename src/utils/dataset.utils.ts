@@ -1,5 +1,5 @@
 import { Dataset, DatasetListItem } from '@/types/dataset.types';
-import { MetadataStatus } from '@/types/metadata.types';
+import { MetadataStatus, METADATA_STATUS } from '@/types/metadata.types';
 import { DisplayStatus } from '@/components/datasets/StatusBadge';
 
 /**
@@ -11,9 +11,8 @@ import { DisplayStatus } from '@/components/datasets/StatusBadge';
 export function hasMetadata(dataset: Dataset | DatasetListItem): boolean {
   // For Dataset objects
   if ('metadataStatus' in dataset) {
-    return dataset.metadataStatus === 'PENDING REVIEW' || 
-           dataset.metadataStatus === 'APPROVED' ||
-           dataset.metadataStatus === 'REJECTED';
+    // A dataset has metadata if it's in any state other than NEEDS_METADATA
+    return dataset.metadataStatus !== METADATA_STATUS.NEEDS_METADATA;
   }
   
   // For DatasetListItem objects
@@ -35,13 +34,13 @@ export function getDisplayStatus(dataset: Dataset | DatasetListItem): DisplaySta
   if ('metadataStatus' in dataset) {
     // Direct mapping from database values to display status
     switch (dataset.metadataStatus as MetadataStatus) {
-      case 'NEEDS METADATA':
+      case METADATA_STATUS.NEEDS_METADATA:
         return 'NEEDS_METADATA';
-      case 'PENDING REVIEW':
+      case METADATA_STATUS.PENDING_REVIEW:
         return 'PENDING_REVIEW';
-      case 'APPROVED':
+      case METADATA_STATUS.APPROVED:
         return 'APPROVED';
-      case 'REJECTED':
+      case METADATA_STATUS.REJECTED:
         return 'REJECTED';
       default:
         return 'NEEDS_METADATA'; // Default fallback

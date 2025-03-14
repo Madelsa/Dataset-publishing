@@ -10,7 +10,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 - AI-powered metadata generation in multiple languages
 - PostgreSQL database integration for storing dataset information
 - Responsive UI with TailwindCSS
-- Simplified status badges for clear workflow status
+- Standardized status values (Needs Metadata, Pending Review, Approved, Rejected)
 - Dataset review workflow with approval/rejection
 - Feedback system for reviewers
 
@@ -21,6 +21,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 - **Database**: PostgreSQL with Prisma ORM
 - **File Processing**: XLSX.js (Excel)
 - **AI Services**: Google Gemini AI (1.5 Flash model)
+- **Type Safety**: TypeScript with constant-based enums
 
 ## Prerequisites
 
@@ -165,7 +166,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 
 3. **Review Workflow**
 
-   - Datasets with completed metadata can be submitted for review
+   - Datasets with completed metadata can be submitted for review (status: "Pending Review")
    - Reviewers can approve or reject datasets
    - Feedback can be provided during approval or rejection
    - Status badges indicate the current state of each dataset
@@ -208,6 +209,8 @@ The application uses Google's Gemini 1.5 Flash model to generate metadata for da
   - `formatting.ts` - Text and data formatting utilities
   - `dataset.utils.ts` - Dataset-specific utilities
   - `api.utils.ts` - API response utilities
+- `src/types/` - TypeScript type definitions
+  - `metadata.types.ts` - Status value constants and type definitions
 - `prisma/` - Database schema and migrations
   - `schema.prisma` - Prisma schema for Dataset and FileMetadata models
 
@@ -223,14 +226,11 @@ The application uses Google's Gemini 1.5 Flash model to generate metadata for da
 - `suggestedTags` - AI-generated tags
 - `suggestedCategory` - AI-generated category
 - `metadataLanguage` - Language of metadata ('en' or 'ar')
-- `metadataStatus` - Status of metadata (PENDING, GENERATED, EDITED, APPROVED)
+- `metadataStatus` - Status of metadata (NEEDS METADATA, PENDING REVIEW, APPROVED, REJECTED)
 - `metadataDraft` - Current draft of metadata being edited
-- `publicationStatus` - Status of publication workflow (DRAFT, PENDING_REVIEW, REJECTED, PUBLISHED)
 - `reviewComment` - Feedback from reviewers
-- `fileMetadata` - One-to-one relation to FileMetadata
 - `createdAt` - Timestamp of creation
 - `updatedAt` - Timestamp of last update
-- `publishedAt` - Timestamp of publication
 
 ### FileMetadata
 
@@ -318,7 +318,15 @@ npx prisma migrate reset
 
 ### Mini-Task 3: Review Workflow
 
-- ✅ Simplified status badges (Needs Metadata, Pending Review, Approved, Rejected)
+- ✅ Standardized status values (Needs Metadata, Pending Review, Approved, Rejected)
 - ✅ Review interface for datasets with "Pending Review" status
 - ✅ Approval and rejection functionality with feedback
 - ✅ Status tracking across the workflow
+
+## Code Optimizations
+
+- ✅ Centralized status constants in `metadata.types.ts`
+- ✅ Type-safe status values using TypeScript's const assertions
+- ✅ Simplified status checks in utility functions
+- ✅ Consistent usage of constants throughout the codebase
+- ✅ Improved type safety in API routes and services

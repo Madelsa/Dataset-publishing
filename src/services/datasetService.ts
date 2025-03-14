@@ -7,7 +7,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { Dataset, ProcessedFile } from '@/types/dataset.types';
-import { MetadataDraft, MetadataSuggestion, MetadataStatus } from '@/types/metadata.types';
+import { MetadataDraft, MetadataSuggestion, MetadataStatus, METADATA_STATUS } from '@/types/metadata.types';
 
 /**
  * Common fileMetadata selection pattern used across queries
@@ -54,7 +54,7 @@ export async function createDataset(
     data: {
       name,
       description,
-      metadataStatus: 'NEEDS METADATA' as MetadataStatus,
+      metadataStatus: METADATA_STATUS.NEEDS_METADATA,
       metadataLanguage: 'en',
       suggestedTags: [],
       fileMetadata: {
@@ -185,7 +185,7 @@ export async function datasetNameExists(name: string): Promise<boolean> {
  * Update dataset metadata with AI-generated suggestions
  * 
  * Saves AI-generated metadata suggestions to a dataset and updates its status.
- * Sets the metadata status to EDITED and resets review status if needed.
+ * Sets the metadata status to NEEDS METADATA to prompt user review.
  * 
  * @param id - The unique identifier of the dataset
  * @param metadata - The AI-generated metadata suggestions
@@ -205,7 +205,7 @@ export async function updateDatasetMetadata(
       suggestedTags: metadata.tags,
       suggestedCategory: metadata.category,
       metadataLanguage: language,
-      metadataStatus: 'NEEDS METADATA' as MetadataStatus
+      metadataStatus: METADATA_STATUS.NEEDS_METADATA
     }
   });
   
@@ -239,12 +239,12 @@ export async function saveMetadataDraft(
   const updateData: any = {
     metadataDraft: draft as any,
     metadataLanguage: language,
-    metadataStatus: 'PENDING REVIEW' as MetadataStatus
+    metadataStatus: METADATA_STATUS.PENDING_REVIEW
   };
   
   // Reset review status if the dataset was previously
   // rejected or approved
-  if (currentDataset.metadataStatus === 'APPROVED') {
+  if (currentDataset.metadataStatus === METADATA_STATUS.APPROVED) {
     // Reset to PENDING REVIEW and clear any previous review comments when status changes
     updateData.reviewComment = null;
   }
@@ -295,27 +295,27 @@ export async function updateDatasetStatus(
   reviewComment?: string
 ): Promise<Dataset> {
   interface DatasetUpdateFields {
-    metadataStatus: string;
+    metadataStatus: MetadataStatus;
     reviewComment?: string | null;
   }
   
   const updateData: DatasetUpdateFields = {
-    metadataStatus: 'NEEDS METADATA', // Default value
+    metadataStatus: METADATA_STATUS.NEEDS_METADATA, // Default value
   };
   
   // Map display status to metadata status
   switch (status) {
     case 'NEEDS_METADATA':
-      updateData.metadataStatus = 'NEEDS METADATA';
+      updateData.metadataStatus = METADATA_STATUS.NEEDS_METADATA;
       break;
     case 'PENDING_REVIEW':
-      updateData.metadataStatus = 'PENDING REVIEW';
+      updateData.metadataStatus = METADATA_STATUS.PENDING_REVIEW;
       break;
     case 'APPROVED':
-      updateData.metadataStatus = 'APPROVED';
+      updateData.metadataStatus = METADATA_STATUS.APPROVED;
       break;
     case 'REJECTED':
-      updateData.metadataStatus = 'REJECTED';
+      updateData.metadataStatus = METADATA_STATUS.REJECTED;
       break;
   }
   

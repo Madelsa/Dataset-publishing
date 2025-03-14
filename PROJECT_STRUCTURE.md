@@ -139,6 +139,7 @@ export default function ComponentName({ prop1, prop2 }: ComponentProps) {
 - **Dependency Injection**: Dependencies are passed as parameters
 - **Explicit Return Types**: All functions have explicit TypeScript return types
 - **Error Handling**: Consistent error handling patterns
+- **Constants Usage**: Constants are imported from centralized type definitions
 
 Example service structure:
 
@@ -166,6 +167,7 @@ export function serviceFunction(param1: Type): ReturnType {
 - **Re-exports**: Core `dataset.types.ts` re-exports from domain-specific files
 - **Documentation**: All types have JSDoc comments
 - **Naming Conventions**: Consistent naming with suffixes like `Input`, `Response`, etc.
+- **Constants with Types**: Status values and other constants are defined with their types
 
 Example type structure:
 
@@ -179,6 +181,17 @@ export interface TypeName {
   /** Description of property */
   property: string;
 }
+
+/**
+ * Constants for TypeName values
+ */
+export const TYPE_NAME_VALUES = {
+  VALUE1: "value1",
+  VALUE2: "value2",
+} as const;
+
+export type TypeNameValue =
+  (typeof TYPE_NAME_VALUES)[keyof typeof TYPE_NAME_VALUES];
 ```
 
 ## Feature Implementation
@@ -197,7 +210,7 @@ export interface TypeName {
 
 ### 3. Review Workflow
 
-- **Status Tracking**: Simplified status badges (Needs Metadata, Pending Review, Approved, Rejected)
+- **Status Tracking**: Standardized status values: Needs Metadata, Pending Review, Approved, Rejected
 - **Review Interface**: Dedicated review page for datasets
 - **Approval Process**: Dataset approval with optional feedback
 - **Rejection Handling**: Dataset rejection with required feedback
@@ -210,6 +223,7 @@ export interface TypeName {
   - `/constants/ai.ts` - AI service settings and prompt templates
   - `/constants/env.ts` - Environment variable handling
 - Constants are re-exported through `/constants/index.ts` for easy imports
+- Status values are centralized in type definition files (e.g., `metadata.types.ts`)
 - Only essential configuration (database connection, API keys) is in environment variables
 - Other configuration is managed through constants files for better type safety and defaults
 
@@ -235,3 +249,5 @@ export interface TypeName {
 3. **Testing**: Write tests for critical functionality
 4. **Performance**: Consider performance implications, especially for file processing
 5. **Accessibility**: Ensure components are accessible
+6. **Type Safety**: Use constants for string literals and define proper types
+7. **DRY Principle**: Use constants to avoid repeating string literals

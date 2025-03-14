@@ -14,6 +14,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { METADATA_STATUS, MetadataStatus } from '@/types/metadata.types';
 
 // Define the metadata state interface
 interface MetadataState {
@@ -32,7 +33,7 @@ interface MetadataState {
     tags: string[];
     category: string;
   } | null;
-  status: 'NEEDS METADATA' | 'PENDING REVIEW' | 'APPROVED' | 'REJECTED';
+  status: MetadataStatus;
 }
 
 // Define actions that can be performed on metadata
@@ -58,7 +59,7 @@ const initialState: MetadataState = {
     category: ''
   },
   draft: null,
-  status: 'NEEDS METADATA'
+  status: METADATA_STATUS.NEEDS_METADATA
 };
 
 /**
@@ -152,7 +153,7 @@ export function MetadataProvider({ children }: MetadataProviderProps) {
       
       // Update state with generated metadata
       dispatch({ type: 'SET_SUGGESTED', payload: data.metadata });
-      dispatch({ type: 'SET_STATUS', payload: 'NEEDS METADATA' });
+      dispatch({ type: 'SET_STATUS', payload: METADATA_STATUS.NEEDS_METADATA });
       
       // Always update the draft with the new metadata when language changes
       // This ensures draft content is updated with the correct language
@@ -199,7 +200,7 @@ export function MetadataProvider({ children }: MetadataProviderProps) {
         throw new Error(error.message || 'Failed to save metadata draft');
       }
       
-      dispatch({ type: 'SET_STATUS', payload: 'PENDING REVIEW' });
+      dispatch({ type: 'SET_STATUS', payload: METADATA_STATUS.PENDING_REVIEW });
       
     } catch (error) {
       dispatch({ 

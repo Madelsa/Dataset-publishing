@@ -1,3 +1,5 @@
+import { METADATA_STATUS } from '@/types/metadata.types';
+
 /**
  * Format a date to a readable string
  * @param date The date to format, can be a Date object, string, or number
@@ -100,13 +102,13 @@ export function getRelativeTimeString(date: Date | string | number): string {
  */
 export function getMetadataStatusClass(status: string): string {
   switch (status) {
-    case 'NEEDS METADATA':
+    case METADATA_STATUS.NEEDS_METADATA:
       return 'bg-purple-100 text-purple-800';
-    case 'PENDING REVIEW':
+    case METADATA_STATUS.PENDING_REVIEW:
       return 'bg-yellow-100 text-yellow-800';
-    case 'APPROVED':
+    case METADATA_STATUS.APPROVED:
       return 'bg-green-100 text-green-800';
-    case 'REJECTED':
+    case METADATA_STATUS.REJECTED:
       return 'bg-red-100 text-red-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -118,13 +120,13 @@ export function getMetadataStatusClass(status: string): string {
  */
 export function getMetadataStatusDescription(status: string): string {
   switch (status) {
-    case 'NEEDS METADATA':
+    case METADATA_STATUS.NEEDS_METADATA:
       return 'Needs metadata to be completed';
-    case 'PENDING REVIEW':
+    case METADATA_STATUS.PENDING_REVIEW:
       return 'Pending review by supervisor';
-    case 'APPROVED':
+    case METADATA_STATUS.APPROVED:
       return 'Approved and published';
-    case 'REJECTED':
+    case METADATA_STATUS.REJECTED:
       return 'Rejected with feedback';
     default:
       return '';

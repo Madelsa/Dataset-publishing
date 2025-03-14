@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatasetById, deleteDataset } from '@/services/datasetService';
+import { METADATA_STATUS } from '@/types/metadata.types';
 
 /**
  * API Route: GET /api/datasets/[id]
@@ -25,9 +26,7 @@ export async function GET(
     // Add hasMetadata property based on metadata status
     const enhancedDataset = {
       ...dataset,
-      hasMetadata: (dataset.metadataStatus as string) === 'PENDING REVIEW' || 
-                   (dataset.metadataStatus as string) === 'APPROVED' ||
-                   (dataset.metadataStatus as string) === 'REJECTED'
+      hasMetadata: dataset.metadataStatus !== METADATA_STATUS.NEEDS_METADATA
     };
 
     return NextResponse.json({ dataset: enhancedDataset });
