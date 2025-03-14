@@ -34,7 +34,7 @@ A web application for uploading, processing, and publishing datasets in CSV and 
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Madelsa/Dataset-publishing.git
    cd Dataset-publishing
    ```
 
